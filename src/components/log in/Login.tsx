@@ -57,7 +57,7 @@ export const Login = () => {
   };
 
   return (
-    <Container style={{ padding: "0" }}>
+    <Container style={{ padding: "0", fontFamily: "monospace" }}>
       <Div
         style={{ backgroundColor: "#1b7be6", borderRadius: "0", gap: "20px" }}
       >
@@ -67,7 +67,13 @@ export const Login = () => {
           Manage your account and access your information
         </p>
       </Div>
-      <Div style={{ backgroundColor: "white", borderRadius: "0" }}>
+      <Div
+        style={{
+          backgroundColor: "white",
+          borderRadius: "0",
+          fontFamily: "monospace",
+        }}
+      >
         <RightSmallDiv
           style={{
             width: "400px",
@@ -77,8 +83,8 @@ export const Login = () => {
             padding: "30px",
           }}
         >
-          <h1>Log in</h1>
-          <form action="post">
+          <h1 style={{ fontFamily: "monospace" }}>Log in</h1>
+          <form style={{ fontFamily: "monospace" }} action="post">
             <label htmlFor="username">Username</label>
             <Cinput
               autoComplete="username"
@@ -138,5 +144,5 @@ export const Cinput = styled.input`
   border-radius: 4px;
   padding: 0 8px;
   box-sizing: border-box;
-  /* margin-bottom: 16px; */
+  font-family: "monospace";
 `;

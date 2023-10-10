@@ -4,9 +4,16 @@ import messageIcon from "../../assets/message-icon.svg";
 import { useNavigate } from "react-router-dom";
 import followersIcon from "../../assets/followers-icon.svg";
 import feedIcon from "../../assets/news-feed-icon.svg";
+import logoutIcon from "../../assets/logout-icon.svg";
 
 export const LeftSideBar = () => {
   const navigate = useNavigate();
+
+  const logOut = () => {
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    navigate("/login");
+  };
+
   return (
     <SidebarDiv>
       <SidebarItemDiv>
@@ -28,8 +35,6 @@ export const LeftSideBar = () => {
           />
           <SideBarText style={{ fontFamily: "monospace" }}>Profile</SideBarText>
         </PearDiv>
-      </SidebarItemDiv>
-      <SidebarItemDiv>
         <PearDiv>
           <SideBarText
             style={{
@@ -56,6 +61,10 @@ export const LeftSideBar = () => {
           <SideBarIcon src={feedIcon} alt="feed icon" />
           <SideBarText style={{ fontFamily: "monospace" }}>Feed</SideBarText>
         </PearDiv>
+        <PearDiv>
+          <SideBarIcon onClick={logOut} src={logoutIcon} alt="logout icon" />
+          <SideBarText style={{ fontFamily: "monospace" }}>Logout</SideBarText>
+        </PearDiv>
       </SidebarItemDiv>
     </SidebarDiv>
   );
@@ -63,29 +72,33 @@ export const LeftSideBar = () => {
 
 const SidebarDiv = styled.div`
   width: 15%;
+  height: 100vh;
   padding: 20px;
   background-color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
 `;
 
 const SidebarItemDiv = styled.div`
   width: 100%;
+  /* height: 200px; */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   border-bottom: 2px solid #f3f3f3;
   border-top: 2px solid #f3f3f3;
-  gap: 10px;
+  gap: 40px;
   padding: 10px 0;
 `;
 
 const PearDiv = styled.div`
   display: flex;
   width: 100%;
+
   align-items: center;
   gap: 10px;
 `;
@@ -95,6 +108,12 @@ const SideBarText = styled.p`
   font-size: 16px;
   font-family: "monospace";
   line-height: 21px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    transform: scale(1.1);
+    transition: all 0.2s ease-in-out;
+  }
 `;
 export const SideBarIcon = styled.img`
   width: 25px;

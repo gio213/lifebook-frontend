@@ -12,7 +12,6 @@ export const Posts = () => {
   const [writePost, setWritePost] = useState("");
   const [comment, setComment] = useState("");
   const [post_id, setPost_id] = useState();
-  const [expired, setExpired] = useState(false);
 
   const getPosts = async (token = "") => {
     try {
@@ -30,6 +29,7 @@ export const Posts = () => {
 
       const data = await response.json();
       setPosts(data.result);
+      console.log(data.result);
     } catch (error) {
       console.error(error);
       // Handle error, e.g., show an error message
@@ -49,7 +49,7 @@ export const Posts = () => {
       // Redirect to another page if the token is not present
       navigate("/login");
     }
-  }, [navigate]);
+  }, [cookieToken, navigate]);
 
   const calculateTime = (date: string) => {
     const currentDate = new Date();
@@ -72,9 +72,8 @@ export const Posts = () => {
     }
   };
 
-  const handleWritePost = (e: any) => {
+  const handleWritePost = (e: React.ChangeEvent<HTMLInputElement>) => {
     setWritePost(e.target.value);
-    return writePost;
   };
 
   const handlePostSubmit = () => {
@@ -96,44 +95,38 @@ export const Posts = () => {
         getPosts(cookieToken);
       });
   };
-  // enter press handler
-  // const handleKeyPress = (e: any) => {
-  //   if (e.key === "Enter" && writePost !== "") {
-  //     handlePostSubmit();
+
+  // const handleCommentCheck = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+  //   if (e.key === "Enter" && comment !== "") {
+  //     createComment();
   //   }
   // };
 
-  const handleCommentCheck = (e: any) => {
-    if (e.key === "Enter" && comment !== "") {
-      createComment();
-    }
-  };
-
-  const handleComment = (e: any) => {
+  const handleComment = (e: React.ChangeEvent<HTMLTextAreaElement>): string => {
     setComment(e.target.value);
     return comment;
   };
 
-  const createComment = () => {
-    fetch("https://lifebookbackend.up.railway.app/api/create_comment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ content: comment, post_id: post_id }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setComment("");
-      })
-      .catch((err) => console.log(err))
-      .finally(() => {
-        getPosts(cookieToken);
-        createComment();
-      });
-  };
+  // const createComment = () => {
+  //   fetch("https://lifebookbackend.up.railway.app/api/create_comment", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: JSON.stringify({ content: comment, post_id: post_id }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data);
+  //       setComment("");
+  //     })
+  //     .catch((err) => console.log(err))
+  //     .finally(() => {
+  //       getPosts(cookieToken);
+  //       createComment();
+  //     });
+  // };
 
   const handlePostClick = (post_id) => {
     setPost_id(post_id);
@@ -141,7 +134,7 @@ export const Posts = () => {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%", height: "700px" }}>
       <PostsDiv>
         <InputDiv>
           <img
@@ -155,7 +148,7 @@ export const Posts = () => {
               width: "60%",
               backgroundColor: "#F2F2F2",
               borderRadius: "20px",
-              margin: "0",
+              margin: "20px",
             }}
             type="text"
             placeholder="Write a post here..."
@@ -181,7 +174,16 @@ export const Posts = () => {
             Post
           </BlueBtn>
         </InputDiv>
-        {posts.length === 0 && <h1 style={{ fontSize: "30px" }}>Loading...</h1>}
+        {posts.length === 0 && (
+          <h1 style={{ fontSize: "30px", fontFamily: "monospace" }}>
+            Loading...
+          </h1>
+        )}
+        {/* {posts.length === 0 && (
+          <h1 style={{ fontSize: "30px", fontFamily: "monospace" }}>
+            You are not following anyone or no one has posted yet
+          </h1>
+        )} */}
 
         {posts?.map(({ author, content, created_at, post_id }) => {
           return (
@@ -192,7 +194,7 @@ export const Posts = () => {
                 alt=""
               />
               <p>{author}</p>
-              <h5>{content}</h5>
+              <h5>Post: {content}</h5>
 
               <p> {calculateTime(created_at)}</p>
               <Cinput
@@ -226,15 +228,17 @@ const PostsDiv = styled.div`
 const PostDiv = styled.div`
   display: flex;
   flex-direction: column;
-  width: 40%;
-  height: 300px;
+  width: 35%;
+  height: 350px;
   justify-content: flex-start;
   background-color: #ffffff;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 35px;
   gap: 10px;
+  border: 1px solid #8b8a8a;
   transition: all 0.2s ease-in-out;
+  font-family: monospace;
   &&:hover {
     transform: scale(1.01);
     cursor: pointer;

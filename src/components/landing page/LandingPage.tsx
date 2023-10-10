@@ -33,6 +33,7 @@ export const Container = styled.div`
   width: 100%;
   height: 100vh;
   padding: 3%;
+  font-family: "monospace";
 `;
 
 export const Div = styled.div`

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Header } from "../header/Header";
 import { Posts } from "../posts/Posts";

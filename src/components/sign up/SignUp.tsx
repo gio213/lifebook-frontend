@@ -79,7 +79,7 @@ export const SignUp = () => {
   };
 
   return (
-    <Container style={{ padding: "0" }}>
+    <Container style={{ padding: "0", fontFamily: "monospace" }}>
       <Div
         style={{ backgroundColor: "#1b7be6", borderRadius: "0", gap: "20px" }}
       >
@@ -164,14 +164,22 @@ export const SignUp = () => {
               <option value="male">Male</option>
               <option value="female">Female</option>
             </Cselect>
-
-            <BlueBtn
-              onClick={subbmit}
-              style={{ width: "100px", height: "35px" }}
-              type="button"
-            >
-              Sign up
-            </BlueBtn>
+            <RegLogDiv>
+              <BlueBtn
+                onClick={subbmit}
+                style={{ width: "100px", height: "35px" }}
+                type="button"
+              >
+                Sign up
+              </BlueBtn>
+              <p>Go to login page</p>
+              <BlueBtn
+                onClick={() => navigate("/login")}
+                style={{ width: "100px", height: "35px" }}
+              >
+                Login
+              </BlueBtn>
+            </RegLogDiv>
           </form>
         </RightSmallDiv>
       </Div>
@@ -221,4 +229,11 @@ const CprofileImgDiv = styled.div`
   align-items: center;
   border: 1px solid #e6e8ec;
   gap: 20px;
+`;
+
+const RegLogDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
 `;

@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Header } from "../header/Header";
 import { BlueBtn } from "../landing page/LandingPage";
 import { Cinput } from "../log in/Login";
+import { LeftSideBar } from "../left sidebar/LeftSideBar";
 export const Profile = () => {
   const [userData, setUserData] = useState({});
   const [username, setUsername] = useState("");
@@ -25,7 +26,7 @@ export const Profile = () => {
 
   const birthDate = userData?.birth_date;
 
-  const calculateAge = (birthDate) => {
+  const calculateAge = (birthDate: Date) => {
     const today = new Date();
     const birthDate2 = new Date(birthDate);
     let age = today.getFullYear() - birthDate2.getFullYear();
@@ -37,43 +38,45 @@ export const Profile = () => {
     return age;
   };
 
-  const handleUsername = (e) => {
-    setUsername(e.target.value);
-  };
-  const handleEmail = (e) => {
-    setEmail(e.target.value);
-  };
-  const handleoldPassword = (e) => {
-    setoldPassword(e.target.value);
-  };
-  const handlenewPassword = (e) => {
-    setnewPassword(e.target.value);
-  };
+  // const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setUsername(e.target.value);
+  // };
+  // const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setEmail(e.target.value);
+  // };
+  // const handleoldPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setoldPassword(e.target.value);
+  // };
+  // const handlenewPassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   setnewPassword(e.target.value);
+  // };
 
-  const resetoldPassword = () => {
-    const api = "http://lifebookbackend.up.railway.app/api/password_reset";
-    fetch(api, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        username: username,
-        email: email,
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      });
-  };
+  // const resetoldPassword = () => {
+  //   const api = "http://lifebookbackend.up.railway.app/api/password_reset";
+  //   fetch(api, {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: JSON.stringify({
+  //       username: username,
+  //       email: email,
+  //       oldPassword: oldPassword,
+  //       newPassword: newPassword,
+  //     }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data);
+  //     });
+  // };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <Header />
+      <LeftSideBar />
+
       <ProfileContainer>
         <h1>Profile:</h1>
         <img
@@ -87,34 +90,6 @@ export const Profile = () => {
         <h2>Gender: {userData?.gender}</h2>
         <h2>Age: {userData?.birth_date && calculateAge(birthDate)}</h2>
       </ProfileContainer>
-      <PassResetDiv>
-        <h1>Reset oldPassword:</h1>
-        <Cinput
-          value={username}
-          onChange={handleUsername}
-          type="text"
-          placeholder="Username"
-        />
-        <Cinput
-          value={email}
-          onChange={handleEmail}
-          type="email"
-          placeholder="Email"
-        />
-        <Cinput
-          value={oldPassword}
-          onChange={handleoldPassword}
-          type="oldPassword"
-          placeholder="old password"
-        />
-        <Cinput
-          value={newPassword}
-          onChange={handlenewPassword}
-          type="oldPassword"
-          placeholder="New password"
-        />
-        <BlueBtn onClick={resetoldPassword}>Reset oldPassword</BlueBtn>
-      </PassResetDiv>
     </div>
   );
 };
