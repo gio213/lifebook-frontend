@@ -40,7 +40,7 @@ export const SignUp = () => {
   const handleprofile_pictureSubmit = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setprofile_picture(e.target.value);
+    setprofile_picture(e.target);
   };
 
   const subbmit = () => {

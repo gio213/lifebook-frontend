@@ -36,8 +36,7 @@ export const SearchInput = () => {
   };
 
   useEffect(() => {
-    username.length > 0 ? fetchUsers() : setIsModalOpen(true),
-      setIsModalOpen(false);
+    username?.length > 0 && fetchUsers();
   }, [username]);
 
   return (
@@ -62,7 +61,7 @@ export const SearchInput = () => {
         onChange={handleSearch}
       />
 
-      <Modal isModalOpen={isModalOpen}>
+      {/* <Modal isModalOpen={isModalOpen}>
         {users?.map(({ username, user_id }) => {
           return (
             <ModalContent key={user_id}>
@@ -72,7 +71,7 @@ export const SearchInput = () => {
           );
         })}
         <CloseButton onClick={() => setIsModalOpen(false)}>X</CloseButton>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
