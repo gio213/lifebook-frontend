@@ -1,1 +1,1 @@
-[Link Linl](https://lifebook-frontend.vercel.app/)
+[Link Link](https://lifebook-frontend.vercel.app/)

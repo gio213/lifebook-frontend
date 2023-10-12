@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { BlueBtn } from "../landing page/LandingPage";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import imageCompression from "browser-image-compression";
 
 export const SignUp = () => {
   const api = "https://lifebookbackend.up.railway.app/api/user_register";
@@ -15,7 +16,7 @@ export const SignUp = () => {
   const [birth_date, setbirth_date] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [profile_picture, setprofile_picture] = useState<string>("");
+  const [profile_picture, setprofile_picture] = useState({} as File);
 
   const handleUsernameSubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -37,45 +38,54 @@ export const SignUp = () => {
     setGender(e.target.value);
     console.log(e.target.value);
   };
+
   const handleprofile_pictureSubmit = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setprofile_picture(e.target);
+    if (e.target.files) {
+      setprofile_picture(e.target.files[0]);
+      console.log(e.target.files[0]);
+    }
   };
 
   const subbmit = () => {
-    console.log(`
-    username: ${username},
-    email: ${email},
-    password: ${password},
-    birth_date: ${birth_date},
-    profile_picture: ${profile_picture},
-    gender:${gender}
-    `);
     register();
   };
   const navigate = useNavigate();
 
-  const register = () => {
-    fetch(api, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-        gender,
-        birth_date,
-        profile_picture,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
+  const register = async () => {
+    if (!profile_picture) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("gender", gender);
+    formData.append("birth_date", birth_date);
+
+    try {
+      const compressedFile = await imageCompression(profile_picture, {
+        maxSizeMB: 1,
+      });
+
+      formData.append("profile_picture", compressedFile);
+
+      fetch(api, {
+        method: "POST",
+        body: formData,
       })
-      .catch((err) => console.log(err));
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          alert("User registered successfully");
+        })
+        .catch((err) => console.log(err));
+    } catch (error) {
+      console.error("Error compressing file:", error);
+    }
   };
 
   return (
@@ -100,7 +110,11 @@ export const SignUp = () => {
           }}
         >
           <h1>Sign up</h1>
-          <form method="post" action="post" encType="multipart/form-data">
+          <form
+            method="post"
+            action="/user_register"
+            encType="multipart/form-data"
+          >
             <CprofileImgDiv>
               <Circle>
                 <Cimg
@@ -111,9 +125,8 @@ export const SignUp = () => {
               <label htmlFor="uploadfile">Upload profile profile_picture</label>
               <input
                 onChange={handleprofile_pictureSubmit}
-                value={profile_picture}
                 type="file"
-                name="profilePicture"
+                name="profile_picture"
                 id="uploadfile"
               />
             </CprofileImgDiv>
@@ -167,7 +180,11 @@ export const SignUp = () => {
             <RegLogDiv>
               <BlueBtn
                 onClick={subbmit}
-                style={{ width: "100px", height: "35px" }}
+                style={{
+                  width: "100px",
+                  height: "35px",
+                  fontFamily: "monospace",
+                }}
                 type="button"
               >
                 Sign up
@@ -175,7 +192,11 @@ export const SignUp = () => {
               <p>Go to login page</p>
               <BlueBtn
                 onClick={() => navigate("/login")}
-                style={{ width: "100px", height: "35px" }}
+                style={{
+                  width: "100px",
+                  height: "35px",
+                  fontFamily: "monospace",
+                }}
               >
                 Login
               </BlueBtn>

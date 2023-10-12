@@ -5,6 +5,7 @@ import { Header } from "../header/Header";
 import { BlueBtn } from "../landing page/LandingPage";
 import { Cinput } from "../log in/Login";
 import { LeftSideBar } from "../left sidebar/LeftSideBar";
+import { ProfileImg } from "../posts/Posts";
 export const Profile = () => {
   const [userData, setUserData] = useState({});
   const [username, setUsername] = useState("");
@@ -73,23 +74,25 @@ export const Profile = () => {
   // };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div>
       <Header />
       <LeftSideBar />
-
-      <ProfileContainer>
-        <h1>Profile:</h1>
-        <img
-          style={{ width: "50px", height: "50px" }}
-          src=" https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png
-        "
-          alt=""
-        />
-        <h2>Username: {userData?.username}</h2>
-        <h2>Email: {userData?.email}</h2>
-        <h2>Gender: {userData?.gender}</h2>
-        <h2>Age: {userData?.birth_date && calculateAge(birthDate)}</h2>
-      </ProfileContainer>
+      <SubContainer>
+        <ProfileContainer>
+          <h1>Profile:</h1>
+          <ProfileImg
+            src={
+              userData?.profile_picture ||
+              "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+            }
+            alt="profile picture"
+          />
+          <h2>Username: {userData?.username}</h2>
+          <h2>Email: {userData?.email}</h2>
+          <h2>Gender: {userData?.gender}</h2>
+          <h2>Age: {userData?.birth_date && calculateAge(birthDate)}</h2>
+        </ProfileContainer>
+      </SubContainer>
     </div>
   );
 };
@@ -98,8 +101,8 @@ const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 30%;
-  height: 500px;
+  justify-content: center;
+
   backdrop-filter: blur(5px);
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
@@ -124,4 +127,12 @@ const PassResetDiv = styled.div`
   justify-content: center;
   align-items: center;
   gap: 20px;
+`;
+const SubContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -700px;
+  margin-left: 100px;
+  font-family: monospace;
 `;

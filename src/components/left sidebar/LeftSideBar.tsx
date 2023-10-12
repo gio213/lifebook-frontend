@@ -5,9 +5,22 @@ import { useNavigate } from "react-router-dom";
 import followersIcon from "../../assets/followers-icon.svg";
 import feedIcon from "../../assets/news-feed-icon.svg";
 import logoutIcon from "../../assets/logout-icon.svg";
-
+import { useGetUSerData } from "../../hooks/useGetUserData";
+import { useEffect, useState } from "react";
+import { ProfileImg } from "../posts/Posts";
 export const LeftSideBar = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState({});
+
+  const { getUserData } = useGetUSerData();
+
+  useEffect(() => {
+    (async () => {
+      const data = await getUserData();
+
+      setUserData(data);
+    })();
+  }, []);
 
   const logOut = () => {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
@@ -27,11 +40,14 @@ export const LeftSideBar = () => {
           <SideBarText style={{ fontFamily: "monospace" }}>Home</SideBarText>
         </PearDiv>
         <PearDiv>
-          <SideBarIcon
-            onClick={() => navigate("/profile")}
+          <ProfileImg
             style={{ width: "20px", height: "20px" }}
-            src="https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
-            alt="profile icon"
+            src={
+              userData?.profile_picture ||
+              "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+            }
+            alt="profile picture"
+            onClick={() => navigate("/profile")}
           />
           <SideBarText style={{ fontFamily: "monospace" }}>Profile</SideBarText>
         </PearDiv>

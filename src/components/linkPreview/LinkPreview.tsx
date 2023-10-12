@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import ReactLinkify from "react-linkify";
 import styled from "styled-components";
 
 const LinkPreviewComponent = ({ writePost }: string) => {
@@ -30,7 +29,7 @@ const LinkPreviewComponent = ({ writePost }: string) => {
   };
 
   useEffect(() => {
-    if (urlRex.test(writePost)) {
+    if (urlRex.test(writePost) && writePost !== "") {
       fetchUrlData();
     } else {
       setLinkData({});

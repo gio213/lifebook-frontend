@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Cinput } from "../log in/Login";
 import { BlueBtn } from "../landing page/LandingPage";
 import LinkPreviewComponent from "../linkPreview/LinkPreview";
+import { useGetUSerData } from "../../hooks/useGetUserData";
 // import { fetchUrlData } from "../../hooks/useGetUserData";
 export const Posts = () => {
   const api =
@@ -14,10 +15,20 @@ export const Posts = () => {
   const [writePost, setWritePost] = useState<string>("");
   const [comment, setComment] = useState("");
   const [post_id, setPost_id] = useState();
-  const [url, setUrl] = useState<string>("");
-  const [urlData, setUrlData] = useState<object[]>([]);
 
-  const [targetValue, setTargetValue] = useState<string>("");
+  const [userData, setUserData] = useState({});
+
+  const { getUserData } = useGetUSerData();
+
+  useEffect(() => {
+    (async () => {
+      const data = await getUserData();
+
+      setUserData(data);
+      console.log(data);
+    })();
+  }, []);
+
   const urlRegex = new RegExp(
     "^(https?:\\/\\/)?" +
       // protocol
@@ -149,11 +160,12 @@ export const Posts = () => {
     <div style={{ width: "100%", height: "700px" }}>
       <PostsDiv>
         <InputDiv>
-          <img
-            style={{ width: "30px", height: "30px" }}
-            src="  https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png
-        "
-            alt=""
+          <ProfileImg
+            src={
+              userData?.profile_picture ||
+              "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+            }
+            alt="profile picture"
           />
           <Cinput
             style={{
@@ -191,7 +203,7 @@ export const Posts = () => {
             Loading...
           </h1>
         )}
-        {writePost.length > 0 || urlRegex.test(writePost) ? (
+        {writePost.length > 0 && urlRegex.test(writePost) ? (
           <LinkPreviewComponent writePost={writePost} />
         ) : (
           ""
@@ -218,8 +230,12 @@ export const Posts = () => {
                     {...{ onClick: () => window.open(url, "_blank") }}
                   >
                     <ProfileImg
-                      src="https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
-                      alt=""
+                      src={
+                        userData?.profile_picture ||
+                        "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+                      }
+                      alt="profile picture"
+                      onClick={() => navigate("/profile")}
                     />
                     <p>Author:{author}</p>
                     <PreviewImg src={images?.[0]} />
@@ -255,7 +271,6 @@ export const Posts = () => {
                     onChange={handleComment}
                   />
                 </PostDiv>
-                {/* <LinkPreviewComponent writePost={writePost} /> */}
               </>
             );
           }
@@ -311,7 +326,6 @@ const InputDiv = styled.div`
   transition: all 0.2s ease-in-out;
   &&:hover {
     transform: scale(1.01);
-    cursor: pointer;
   }
 `;
 
@@ -332,19 +346,23 @@ export const PreviewDiv = styled.div`
 
   &&:hover {
     transform: scale(1.01);
-    cursor: pointer;
   }
 `;
 
-const ProfileImg = styled.img`
+export const ProfileImg = styled.img`
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  object-fit: cover;
 `;
 const PreviewImg = styled.img`
   width: 100%;
   border-radius: 20px;
   object-fit: cover;
+  &&:hover {
+    transform: scale(1.01);
+    cursor: pointer;
+  }
 `;
 
 const DescriptionDiv = styled.div`
@@ -354,4 +372,7 @@ const DescriptionDiv = styled.div`
   background-color: #c9c3c3;
   border-radius: 20px;
   word-wrap: break-word;
+  P {
+    max-width: 100%;
+  }
 `;

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { SearchInput } from "../search/Search";
 import notificationIcon from "../../assets/notifications-icon.svg";
 import { SideBarIcon } from "../left sidebar/LeftSideBar";
+import { ProfileImg } from "../posts/Posts";
 export const Header = () => {
   const [userData, setUserData] = useState({});
 
@@ -51,7 +52,14 @@ export const Header = () => {
           </h3>
         )}
 
-        <SideBarIcon src="https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png" />
+        <ProfileImg
+          src={
+            userData?.profile_picture ||
+            "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+          }
+          alt="profile picture"
+          onClick={() => navigate("/profile")}
+        />
       </HeaderRightDiv>
     </Div>
   );
