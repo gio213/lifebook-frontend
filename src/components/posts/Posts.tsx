@@ -5,6 +5,7 @@ import { Cinput } from "../log in/Login";
 import { BlueBtn } from "../landing page/LandingPage";
 import LinkPreviewComponent from "../linkPreview/LinkPreview";
 import { useGetUSerData } from "../../hooks/useGetUserData";
+import axios from "axios";
 // import { fetchUrlData } from "../../hooks/useGetUserData";
 export const Posts = () => {
   const api =
@@ -25,7 +26,6 @@ export const Posts = () => {
       const data = await getUserData();
 
       setUserData(data);
-      console.log(data);
     })();
   }, []);
 
@@ -46,20 +46,17 @@ export const Posts = () => {
 
   const getPosts = async (token = "") => {
     try {
-      const response = await fetch(api, {
-        method: "GET",
+      const response = await axios.get(api, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("API request failed");
       }
 
-      const { result } = await response.json();
-
-      console.log("array of posts", result);
+      const { result } = response.data;
 
       const postsArray = [];
 
@@ -68,12 +65,10 @@ export const Posts = () => {
           postsArray.push(post);
         } else {
           const previewData = await fetchUrlData(post.content);
-          console.log("previewData", previewData);
+
           postsArray.push({ ...post, ...previewData });
         }
       }
-
-      console.log("postsArray", postsArray);
 
       setPosts(postsArray);
     } catch (error) {
@@ -83,9 +78,15 @@ export const Posts = () => {
   const cookieToken = document.cookie.split("=")[1];
 
   const fetchUrlData = async (url) => {
-    return await (
-      await fetch(`https://jsonlink.io/api/extract?url=${url}`)
-    ).json();
+    try {
+      const response = await axios.get(
+        `https://jsonlink.io/api/extract?url=${url}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -135,7 +136,6 @@ export const Posts = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         setWritePost("");
         alert("Post created successfully");
       })
@@ -220,15 +220,15 @@ export const Posts = () => {
             url,
             title,
             domain,
+            index,
+            profile_picture,
           }) => {
             const hasContent = images?.[0]?.length > 3;
 
             return (
               <>
                 {hasContent && (
-                  <PreviewDiv
-                    {...{ onClick: () => window.open(url, "_blank") }}
-                  >
+                  <PostDiv key={post_id}>
                     <ProfileImg
                       src={
                         userData?.profile_picture ||
@@ -238,7 +238,11 @@ export const Posts = () => {
                       onClick={() => navigate("/profile")}
                     />
                     <p>Author:{author}</p>
-                    <PreviewImg src={images?.[0]} />
+                    <PreviewImg
+                      key={index}
+                      src={images?.[0]}
+                      {...{ onClick: () => window.open(url, "_blank") }}
+                    />
                     <h5>Title: {title}</h5>
                     <DescriptionDiv>
                       <p>{description}</p>
@@ -252,13 +256,14 @@ export const Posts = () => {
                       onChange={handleComment}
                     />
                     <p>Source:{domain}</p>
-                  </PreviewDiv>
+                  </PostDiv>
                 )}
                 <PostDiv onClick={() => handlePostClick(post_id)} key={post_id}>
                   <ProfileImg
                     src="https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
                     alt=""
                   />
+
                   <p>Author:{author}</p>
                   <h5>Post: {content}</h5>
 
@@ -297,8 +302,7 @@ const PostsDiv = styled.div`
 const PostDiv = styled.div`
   display: flex;
   flex-direction: column;
-  width: 35%;
-  width: 350px;
+  width: 40%;
   justify-content: flex-start;
   background-color: #ffffff;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
@@ -315,7 +319,7 @@ const PostDiv = styled.div`
 
 const InputDiv = styled.div`
   display: flex;
-  width: 40%;
+  width: 45%;
   height: 100px;
   justify-content: center;
   align-items: center;
@@ -354,6 +358,10 @@ export const ProfileImg = styled.img`
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
+  &&:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+  }
 `;
 const PreviewImg = styled.img`
   width: 100%;

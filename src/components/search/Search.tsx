@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Cinput } from "../log in/Login";
 import styled from "styled-components";
-
+import axios from "axios";
 export const SearchInput = () => {
   const token = document.cookie.split("=")[1];
+
   const api = "https://lifebookbackend.up.railway.app/api/user_search";
   const [users, setUsers] = useState<[]>([]);
   const [username, setUsername] = useState("");
@@ -11,32 +12,39 @@ export const SearchInput = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
+    console.log(username);
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (api: string, username: string) => {
     try {
-      const response = await fetch(`${api}?username=${username}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        api,
+        { username: username },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Set the content type for the request body
+          },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        // Handle unexpected status codes
+        throw new Error(`Request failed with status ${response.status}`);
       }
-
-      const data = await response.json();
-      setUsers(data.result);
-      setIsModalOpen(true);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      // Handle any errors that occurred during the request
+      console.error("Request failed:", error);
+      throw error;
     }
   };
 
   useEffect(() => {
-    username?.length > 0 && fetchUsers();
+    if (username.length > 3) {
+      fetchUsers(username);
+    }
   }, [username]);
 
   return (
