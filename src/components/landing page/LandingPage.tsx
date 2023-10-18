@@ -15,10 +15,15 @@ const LandingPage = () => {
       <Div style={{ backgroundColor: "white", gap: "50px" }}>
         <RightSmallDiv>
           <img src={img} alt="small img" />
-          <h1>Lifebook</h1>
-          <p>Connect with Others</p>
+          <h1 style={{ fontFamily: "monospace" }}>Lifebook</h1>
+          <p style={{ fontFamily: "monospace" }}>Connect with Others</p>
         </RightSmallDiv>
-        <BlueBtn onClick={() => navigate("/login")}>Log in 🤔 Register</BlueBtn>
+        <BlueBtn
+          style={{ fontFamily: "monospace", width: "fit-content" }}
+          onClick={() => navigate("/login")}
+        >
+          Log in 🤔 Register
+        </BlueBtn>
       </Div>
     </Container>
   );

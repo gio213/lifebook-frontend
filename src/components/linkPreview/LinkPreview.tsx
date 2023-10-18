@@ -46,7 +46,7 @@ const LinkPreviewComponent = ({ writePost }: string) => {
 };
 export default LinkPreviewComponent;
 
-const LinkPreviewDiv = styled.div`
+export const LinkPreviewDiv = styled.div`
   display: flex;
   flex-direction: column;
   width: 35%;

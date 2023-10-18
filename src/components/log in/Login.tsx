@@ -7,6 +7,7 @@ import { BlueBtn } from "../landing page/LandingPage";
 import { useNavigate } from "react-router-dom";
 import { useState, ChangeEvent } from "react";
 import { useEffect } from "react";
+import { FormDiv } from "../sign up/SignUp";
 
 export const Login = () => {
   const api = "https://lifebookbackend.up.railway.app/api/user_login";
@@ -50,6 +51,7 @@ export const Login = () => {
         console.log(data);
         document.cookie = `token=${data.token}`;
         if (data.token) {
+          alert("You are logged in");
           navigate("/newsfeed");
         }
       })
@@ -84,7 +86,7 @@ export const Login = () => {
           }}
         >
           <h1 style={{ fontFamily: "monospace" }}>Log in</h1>
-          <form style={{ fontFamily: "monospace" }} action="post">
+          <FormDiv style={{ fontFamily: "monospace" }} action="post">
             <label htmlFor="username">Username</label>
             <Cinput
               autoComplete="username"
@@ -119,7 +121,7 @@ export const Login = () => {
             >
               Log in
             </BlueBtn>
-          </form>
+          </FormDiv>
           <div>
             <p>
               Don't have an account?{" "}

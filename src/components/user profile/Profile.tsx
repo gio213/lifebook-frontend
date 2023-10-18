@@ -77,6 +77,7 @@ export const Profile = () => {
     <div>
       <Header />
       <LeftSideBar />
+
       <SubContainer>
         <ProfileContainer>
           <h1>Profile:</h1>
@@ -102,7 +103,6 @@ const ProfileContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   backdrop-filter: blur(5px);
   background-color: rgb(255, 255, 255);
   border-radius: 10px;
@@ -129,10 +129,12 @@ const PassResetDiv = styled.div`
   gap: 20px;
 `;
 const SubContainer = styled.div`
+  width: 70%;
+  height: 500px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-top: -700px;
+  margin-top: -400px;
   margin-left: 100px;
   font-family: monospace;
 `;

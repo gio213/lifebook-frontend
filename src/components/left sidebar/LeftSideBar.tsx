@@ -88,7 +88,7 @@ export const LeftSideBar = () => {
 
 const SidebarDiv = styled.div`
   width: 15%;
-  height: 100vh;
+
   padding: 20px;
   background-color: white;
   display: flex;

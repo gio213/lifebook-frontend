@@ -110,7 +110,7 @@ export const SignUp = () => {
           }}
         >
           <h1>Sign up</h1>
-          <form
+          <FormDiv
             method="post"
             action="/user_register"
             encType="multipart/form-data"
@@ -201,7 +201,7 @@ export const SignUp = () => {
                 Login
               </BlueBtn>
             </RegLogDiv>
-          </form>
+          </FormDiv>
         </RightSmallDiv>
       </Div>
     </Container>
@@ -257,4 +257,13 @@ const RegLogDiv = styled.div`
   justify-content: space-between;
   width: 100%;
   align-items: center;
+`;
+
+export const FormDiv = styled.form`
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: 5px;
 `;
