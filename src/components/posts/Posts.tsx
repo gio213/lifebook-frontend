@@ -53,6 +53,18 @@ export const Posts = () => {
     "i"
   );
 
+  const fetchPreviewData = async (posts) => {
+    const previewDataPromises = posts.map(async (post) => {
+      if (urlRegex.test(post.content)) {
+        const previewData = await fetchUrlData(post.content);
+        return { ...post, ...previewData };
+      }
+      return post;
+    });
+
+    return await Promise.all(previewDataPromises);
+  };
+
   const getPosts = async (token = "") => {
     try {
       const response = await axios.get(api, {
@@ -66,24 +78,13 @@ export const Posts = () => {
       }
 
       const { result } = response.data;
-
-      const postsArray = [];
-
-      for (const post of result) {
-        if (!urlRegex.test(post.content)) {
-          postsArray.push(post);
-        } else {
-          const previewData = await fetchUrlData(post.content);
-
-          postsArray.push({ ...post, ...previewData });
-        }
-      }
-
-      setPosts(postsArray);
+      const postsWithPreviewData = await fetchPreviewData(result);
+      setPosts(postsWithPreviewData);
     } catch (error) {
       console.error(error);
     }
   };
+
   const cookieToken = document.cookie.split("=")[1];
 
   const fetchUrlData = async (url) => {

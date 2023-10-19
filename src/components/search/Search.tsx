@@ -58,7 +58,7 @@ export const SearchInput = () => {
       setUserData(data);
     })();
 
-    if (username.length > 3) {
+    if (username.length > 1) {
       fetchUsers();
     } else {
       setUsers([]);
