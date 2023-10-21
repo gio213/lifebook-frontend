@@ -16,15 +16,15 @@ export const Login = () => {
   const [password, setPassword] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [token, setToken] = useState<string>("");
+  const [loginData, setLoginData] = useState([]);
 
+  // const cookie = document.cookie.includes("token");
   useEffect(() => {
-    const cookie = document.cookie.split("=")[1];
-
-    if (cookie) {
+    if (token && !undefined) {
       navigate("/newsfeed");
       return;
     }
-  }, []);
+  }, [token, navigate]);
 
   const handleUsernameSubmit = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -38,24 +38,29 @@ export const Login = () => {
   };
 
   const handleSubmit = () => {
-    fetch(api, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, email, password }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setToken(data.token);
-        console.log(data);
-        document.cookie = `token=${data.token}`;
-        if (data.token) {
-          alert("You are logged in");
-          navigate("/newsfeed");
-        }
+    if (!username || !email || !password) {
+      return alert("Please fill all the fields");
+    } else {
+      fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
       })
-      .catch((err) => console.log(err));
+        .then((res) => res.json())
+        .then((data) => {
+          setToken(data.token);
+          console.log(data);
+
+          const message = data.message;
+
+          setLoginData(message);
+
+          document.cookie = `token=${data.token}`;
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   return (
@@ -65,9 +70,7 @@ export const Login = () => {
       >
         <img src={sing_up_img} alt="sign up img"></img>
         <h1 style={{ color: "white" }}>Welcome to Lifebook!</h1>
-        <p style={{ color: "white" }}>
-          Manage your account and access your information
-        </p>
+        <p style={{ color: "white" }}>Connect with your friends</p>
       </Div>
       <Div
         style={{

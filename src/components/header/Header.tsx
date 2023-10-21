@@ -8,6 +8,9 @@ import { SideBarIcon } from "../left sidebar/LeftSideBar";
 import { ProfileImg } from "../posts/Posts";
 import axios from "axios";
 import redBellIcon from "../../assets/red-bell-icon.png";
+import { BlueBtn } from "../landing page/LandingPage";
+import closeIcon from "../../assets/close-icon.png";
+
 export const Header = () => {
   const [userData, setUserData] = useState({});
   const [notifications, setNotifications] = useState<[]>([]);
@@ -51,19 +54,59 @@ export const Header = () => {
       getNotifications();
     })();
   }, []);
-  // console.log(notifications);
 
   const handleNotificationClick = () => {
-    return notifications.map(
-      (notification, sender_name, sender_profile_picture, type) => {
+    return notifications.map((notification, index) => {
+      if (isShow && notifications.length !== 0) {
         return (
-          <NotificationDiv>
-            <h1>{notification.sender_name}</h1>
-            <h1>{notification.type}</h1>
+          <NotificationDiv key={notification.notification_id}>
+            <CloseBtn
+              src={closeIcon}
+              alt="close icon"
+              onClick={() => setIsShow(false)}
+            />
+            <NotificationItem>
+              <ProfileImg src={notification.sender_profile_picture} alt="" />
+              <h3>{notification.sender_name}</h3>
+              <p>{`sent you ${notification.type}`}</p>
+              <BlueBtn
+                style={{
+                  width: "fit-content",
+                  height: "30px",
+                  fontFamily: "monospace",
+                }}
+              >
+                Accept
+              </BlueBtn>
+              <BlueBtn
+                style={{
+                  width: "fit-content",
+                  height: "30px",
+                  fontFamily: "monospace",
+                }}
+              >
+                Decline
+              </BlueBtn>
+            </NotificationItem>
+          </NotificationDiv>
+        );
+      } else if (isShow && notifications.length == 0) {
+        console.log("no notifications");
+        return (
+          <NotificationDiv key={index}>
+            <CloseBtn
+              src={closeIcon}
+              alt="close icon"
+              onClick={() => setIsShow(false)}
+            />
+
+            <NotificationItem>
+              <h1>No notifications</h1>
+            </NotificationItem>
           </NotificationDiv>
         );
       }
-    );
+    });
   };
 
   return (
@@ -89,17 +132,13 @@ export const Header = () => {
           <SideBarIcon
             src={notificationIcon}
             alt=""
-            onClick={handleNotificationClick}
+            onClick={() => setIsShow(true)}
           />
         ) : (
           <AnimateBell
             src={redBellIcon}
             alt=""
-            onClick={() => {
-              handleNotificationClick();
-              setIsShow(true);
-              console.log("clicked");
-            }}
+            onClick={() => setIsShow(true)}
           />
         )}
 
@@ -196,15 +235,60 @@ const AnimateBell = styled.img`
   }
 `;
 const NotificationDiv = styled.div`
-  width: 100px;
-  /* height: 200px; */
-  overflow-y: scroll;
-
-  position: absolute;
-  top: 50;
-  left: 50;
-  z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: fit-content;
+  height: 200px;
+  overflow-y: scroll;
+  z-index: 1000;
+  top: 80px;
+  right: 50px;
+  border-radius: 4px;
+  position: absolute;
+  background-color: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+`;
+
+const NotificationItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: fit-content;
+  padding: 10px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e6e8ec;
+  background-color: #c3e3f0;
+  border-radius: 10px;
+  gap: 10px;
+
+  &&:hover {
+    cursor: pointer;
+    background-color: #e6e8ec;
+  }
+  && > h3 {
+    font-family: "monospace";
+    font-weight: bold;
+
+    text-transform: capitalize;
+  }
+  && > p {
+    font-family: "monospace";
+  }
+`;
+
+const CloseBtn = styled.img`
+  width: 15px;
+  height: 15px;
+  border: none;
+  position: absolute;
+  z-index: 1000;
+  top: -1px;
+  right: 1px;
+  &&:hover {
+    cursor: pointer;
+  }
 `;

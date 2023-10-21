@@ -54,37 +54,58 @@ export const SignUp = () => {
   const navigate = useNavigate();
 
   const register = async () => {
-    if (!profile_picture) {
-      alert("Please select a file.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("username", username);
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("gender", gender);
-    formData.append("birth_date", birth_date);
-
     try {
+      // Validate inputs
+      if (
+        !profile_picture ||
+        !username ||
+        !email ||
+        !password ||
+        !gender ||
+        !birth_date
+      ) {
+        alert("Please fill all the fields");
+        return;
+      }
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("gender", gender);
+      formData.append("birth_date", birth_date);
+
+      // Compress the profile picture if it's larger than 1MB
+      if (profile_picture.size > 1048576) {
+        // 1 MB limit
+        alert("Profile picture size exceeds the limit (1 MB).");
+        return;
+      }
+
       const compressedFile = await imageCompression(profile_picture, {
         maxSizeMB: 1,
       });
-
       formData.append("profile_picture", compressedFile);
 
-      fetch(api, {
+      // Send the data to the server
+      const response = await fetch(api, {
         method: "POST",
         body: formData,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          alert("User registered successfully");
-        })
-        .catch((err) => console.log(err));
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        alert(data.message);
+      } else {
+        const errorData = await response.json();
+        console.error("Error registering the user:", errorData);
+        alert("Error registering the user: " + errorData.message);
+      }
     } catch (error) {
-      console.error("Error compressing file:", error);
+      console.error("Error:", error);
+      alert("An error occurred while registering.");
     }
   };
 

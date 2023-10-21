@@ -7,6 +7,7 @@ import LinkPreviewComponent from "../linkPreview/LinkPreview";
 import { useGetUSerData } from "../../hooks/useGetUserData";
 import axios from "axios";
 import { library } from "@fortawesome/fontawesome-svg-core";
+import Toast from "../toas messages/ToastMessages";
 import {
   faCloudUpload,
   faDeleteLeft,
@@ -243,11 +244,7 @@ export const Posts = () => {
             Post
           </BlueBtn>
         </InputDiv>
-        {posts.length === 0 && (
-          <h1 style={{ fontSize: "30px", fontFamily: "monospace" }}>
-            Loading...
-          </h1>
-        )}
+
         {writePost.length > 0 && urlRegex.test(writePost) ? (
           <LinkPreviewComponent writePost={writePost} />
         ) : (
