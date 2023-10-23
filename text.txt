@@ -1,0 +1,53 @@
+  const handleNotificationClick = () => {
+    return notifications.map((notification, index) => {
+      if (isShow && notifications.length !== 0) {
+        return (
+          <NotificationDiv key={notification.notification_id}>
+            <CloseBtn
+              src={closeIcon}
+              alt="close icon"
+              onClick={() => setIsShow(false)}
+            />
+            <NotificationItem>
+              <ProfileImg src={notification.sender_profile_picture} alt="" />
+              <h3>{notification.sender_name}</h3>
+              <p>{`sent you ${notification.type}`}</p>
+              <BlueBtn
+                style={{
+                  width: "fit-content",
+                  height: "30px",
+                  fontFamily: "monospace",
+                }}
+              >
+                Accept
+              </BlueBtn>
+              <BlueBtn
+                style={{
+                  width: "fit-content",
+                  height: "30px",
+                  fontFamily: "monospace",
+                }}
+              >
+                Decline
+              </BlueBtn>
+            </NotificationItem>
+          </NotificationDiv>
+        );
+      } else if (isShow && notifications.length == 0) {
+        console.log("no notifications");
+        return (
+          <NotificationDiv key={index}>
+            <CloseBtn
+              src={closeIcon}
+              alt="close icon"
+              onClick={() => setIsShow(false)}
+            />
+
+            <NotificationItem>
+              <h1>No notifications</h1>
+            </NotificationItem>
+          </NotificationDiv>
+        );
+      }
+    });
+  };

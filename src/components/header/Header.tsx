@@ -10,12 +10,15 @@ import axios from "axios";
 import redBellIcon from "../../assets/red-bell-icon.png";
 import { BlueBtn } from "../landing page/LandingPage";
 import closeIcon from "../../assets/close-icon.png";
+import { calculateTime } from "../../hooks/useGetUserData";
 
 export const Header = () => {
   const [userData, setUserData] = useState({});
   const [notifications, setNotifications] = useState<[]>([]);
   const token = document.cookie.split("=")[1];
   const [isShow, setIsShow] = useState(false);
+  const [follower_id, setFollower_id] = useState<number>();
+  const [acceptRejectValue, setAcceptRejectValue] = useState<string>("");
   const getNotificationApi =
     "https://lifebookbackend.up.railway.app/api/get_notifications";
 
@@ -46,6 +49,36 @@ export const Header = () => {
     }
   };
 
+  const acceptRejectFollowRequestTest = () => {
+    setAcceptRejectValue("1");
+  };
+
+  const acceptRequest = () => {
+    const api = `https://lifebookbackend.up.railway.app/api/accept_reject_follow_request/`;
+
+    console.log(follower_id, acceptRejectValue);
+
+    fetch(api, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        follower_id: follower_id,
+        accepted: acceptRejectValue,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   useEffect(() => {
     (async () => {
       const data = await getUserData();
@@ -56,20 +89,37 @@ export const Header = () => {
   }, []);
 
   const handleNotificationClick = () => {
-    return notifications.map((notification, index) => {
+    return notifications.map((notification, index, sender_id) => {
       if (isShow && notifications.length !== 0) {
         return (
-          <NotificationDiv key={notification.notification_id}>
+          <div key={notification.notification_id}>
             <CloseBtn
               src={closeIcon}
               alt="close icon"
               onClick={() => setIsShow(false)}
             />
-            <NotificationItem>
+            <NotificationItem
+              onClick={(e) => {
+                setFollower_id(notification.sender_id);
+                setAcceptRejectValue(e.target.value);
+              }}
+            >
               <ProfileImg src={notification.sender_profile_picture} alt="" />
-              <h3>{notification.sender_name}</h3>
-              <p>{`sent you ${notification.type}`}</p>
+              <h3 style={{ fontFamily: "monospace" }}>
+                {notification.sender_name}
+              </h3>
+              <p
+                style={{ fontFamily: "monospace" }}
+              >{`sent you ${notification.type}`}</p>
+              <p style={{ fontFamily: "monospace", color: "grey" }}>
+                {calculateTime(notification.created_at)}
+              </p>
               <BlueBtn
+                value={"1"}
+                onClick={(e) => {
+                  setAcceptRejectValue(e.target.value);
+                  acceptRequest();
+                }}
                 style={{
                   width: "fit-content",
                   height: "30px",
@@ -79,6 +129,11 @@ export const Header = () => {
                 Accept
               </BlueBtn>
               <BlueBtn
+                value={"0"}
+                onClick={(e) => {
+                  setAcceptRejectValue(e.target.value);
+                  acceptRequest();
+                }}
                 style={{
                   width: "fit-content",
                   height: "30px",
@@ -88,30 +143,19 @@ export const Header = () => {
                 Decline
               </BlueBtn>
             </NotificationItem>
-          </NotificationDiv>
-        );
-      } else if (isShow && notifications.length == 0) {
-        console.log("no notifications");
-        return (
-          <NotificationDiv key={index}>
-            <CloseBtn
-              src={closeIcon}
-              alt="close icon"
-              onClick={() => setIsShow(false)}
-            />
-
-            <NotificationItem>
-              <h1>No notifications</h1>
-            </NotificationItem>
-          </NotificationDiv>
+          </div>
         );
       }
     });
   };
+  console.log(notifications);
 
   return (
     <Div>
-      {isShow && handleNotificationClick()}
+      {isShow ? (
+        <NotificationDiv>{handleNotificationClick()}</NotificationDiv>
+      ) : null}
+
       <div style={{ width: "345px" }}>
         <h1
           style={{
@@ -129,11 +173,7 @@ export const Header = () => {
 
       <HeaderRightDiv>
         {notifications.length == 0 ? (
-          <SideBarIcon
-            src={notificationIcon}
-            alt=""
-            onClick={() => setIsShow(true)}
-          />
+          <SideBarIcon src={notificationIcon} alt="" />
         ) : (
           <AnimateBell
             src={redBellIcon}
@@ -238,8 +278,9 @@ const NotificationDiv = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: fit-content;
-  height: 200px;
+  /* height: 200px; */
   overflow-y: scroll;
   z-index: 1000;
   top: 80px;
@@ -249,6 +290,7 @@ const NotificationDiv = styled.div`
   background-color: #fff;
   padding: 10px;
   box-sizing: border-box;
+  gap: 10px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
 `;
 

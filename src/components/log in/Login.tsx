@@ -8,27 +8,29 @@ import { useNavigate } from "react-router-dom";
 import { useState, ChangeEvent } from "react";
 import { useEffect } from "react";
 import { FormDiv } from "../sign up/SignUp";
+import Toast from "../../components/toas messages/ToastMessages";
+import { Toaster } from "react-hot-toast";
 
 export const Login = () => {
   const api = "https://lifebookbackend.up.railway.app/api/user_login";
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
   const [token, setToken] = useState<string>("");
   const [loginData, setLoginData] = useState([]);
+  const [visible, setVisible] = useState<boolean>(false);
 
   // const cookie = document.cookie.includes("token");
   useEffect(() => {
-    if (token && !undefined) {
-      navigate("/newsfeed");
-      return;
-    }
+    setTimeout(() => {
+      if (token && !undefined) {
+        navigate("/newsfeed");
+        return;
+      } else {
+        navigate("/login");
+      }
+    }, 1500);
   }, [token, navigate]);
-
-  const handleUsernameSubmit = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  };
 
   const handelEmailSubmit = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -37,34 +39,34 @@ export const Login = () => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = () => {
-    if (!username || !email || !password) {
-      return alert("Please fill all the fields");
-    } else {
-      fetch(api, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password }),
+  const handleSubmit = async () => {
+    await fetch(api, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setToken(data.token);
+        console.log(data);
+        const message = data.message;
+
+        setLoginData(message);
+        console.log(loginData);
+
+        document.cookie = `token=${data.token}`;
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setToken(data.token);
-          console.log(data);
-
-          const message = data.message;
-
-          setLoginData(message);
-
-          document.cookie = `token=${data.token}`;
-        })
-        .catch((err) => console.log(err));
-    }
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setVisible(true);
+      });
   };
 
   return (
     <Container style={{ padding: "0", fontFamily: "monospace" }}>
+      {visible && <Toast message={loginData} setVisible={setVisible} />}
       <Div
         style={{ backgroundColor: "#1b7be6", borderRadius: "0", gap: "20px" }}
       >
@@ -90,15 +92,6 @@ export const Login = () => {
         >
           <h1 style={{ fontFamily: "monospace" }}>Log in</h1>
           <FormDiv style={{ fontFamily: "monospace" }} action="post">
-            <label htmlFor="username">Username</label>
-            <Cinput
-              autoComplete="username"
-              onChange={handleUsernameSubmit}
-              value={username}
-              type="text"
-              name="username"
-              id="username"
-            />
             <label htmlFor="email">Email</label>
             <Cinput
               autoComplete="email"
@@ -138,6 +131,8 @@ export const Login = () => {
           </div>
         </RightSmallDiv>
       </Div>
+
+      <Toaster />
     </Container>
   );
 };

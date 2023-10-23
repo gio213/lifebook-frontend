@@ -65,8 +65,10 @@ export const SearchInput = () => {
     }
   }, [username]);
 
-  const sendFollowRequest = async () => {
+  const sendFollowRequest = () => {
     const follower_id = userData["user_id"];
+    console.log(follower_id, followee_id);
+
     fetch(sendFollowRequestApi, {
       method: "POST",
       headers: {
@@ -75,8 +77,8 @@ export const SearchInput = () => {
         "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
-        follower_id: follower_id,
-        followee_id: followee_id,
+        follower_id: 101,
+        followee_id: 100,
       }),
     })
       .then((response) => response.json())

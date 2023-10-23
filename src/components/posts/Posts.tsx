@@ -7,7 +7,9 @@ import LinkPreviewComponent from "../linkPreview/LinkPreview";
 import { useGetUSerData } from "../../hooks/useGetUserData";
 import axios from "axios";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import Toast from "../toas messages/ToastMessages";
+import Toast from "../../components/toas messages/ToastMessages";
+import { Likes } from "../likes/Likes";
+import { calculateTime } from "../../hooks/useGetUserData";
 import {
   faCloudUpload,
   faDeleteLeft,
@@ -26,8 +28,9 @@ export const Posts = () => {
   const [comment, setComment] = useState("");
   const [post_id, setPost_id] = useState();
   const [profile_picture, setprofile_picture] = useState({} as File);
-
+  const [visible, setVisible] = useState<boolean>(true);
   const [userData, setUserData] = useState({});
+  const [loginData, setLoginData] = useState("");
 
   const { getUserData } = useGetUSerData();
 
@@ -109,27 +112,6 @@ export const Posts = () => {
     }
   }, [cookieToken, navigate]);
 
-  const calculateTime = (date: string) => {
-    const currentDate = new Date();
-    const postDate = new Date(date);
-
-    const diff = currentDate.getTime() - postDate.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor(diff / (1000 * 60));
-    const seconds = Math.floor(diff / 1000);
-
-    // shows days hours minutes seconds
-    if (hours > 24) {
-      return `${Math.floor(hours / 24)} days ago`;
-    } else if (minutes > 60) {
-      return `${Math.floor(minutes / 60)} hours ago`;
-    } else if (seconds > 60) {
-      return `${Math.floor(seconds / 60)} minutes ago`;
-    } else {
-      return `${seconds} seconds ago`;
-    }
-  };
-
   const handleWritePost = (e: React.ChangeEvent<HTMLInputElement>) => {
     setWritePost(e.target.value);
 
@@ -149,27 +131,31 @@ export const Posts = () => {
   formData.append("content", writePost);
   formData.append("user_id", userData?.user_id);
   const handlePostSubmit = () => {
-    if (!writePost) return alert("Please write something");
-
-    axios
-      .post(
-        "https://lifebookbackend.up.railway.app/api/create_post",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      .then((res) => {
-        console.log(res);
-        console.log(res.data);
-        alert("Post created successfully");
-        setWritePost("");
-      })
-      .finally(() => {
-        getPosts(cookieToken);
-      });
+    if (!writePost) {
+      alert("Please write something");
+    } else {
+      axios
+        .post(
+          "https://lifebookbackend.up.railway.app/api/create_post",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+          console.log(res.data);
+          const message = res.data.message;
+          setLoginData(message);
+          setWritePost("");
+        })
+        .finally(() => {
+          getPosts(cookieToken);
+          setVisible(true);
+        });
+    }
   };
 
   const handleComment = (e: React.ChangeEvent<HTMLTextAreaElement>): string => {
@@ -179,12 +165,15 @@ export const Posts = () => {
 
   const handlePostClick = (post_id: number): number => {
     setPost_id(post_id);
+    console.log(post_id);
 
     return post_id;
   };
+  console.log(posts);
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
+      {visible && <Toast message={loginData} setVisible={setVisible} />}
       <FirstDiv>
         <InputDiv>
           <ProfileImg
@@ -268,64 +257,51 @@ export const Posts = () => {
           profilePicture,
           post_image,
         }) => {
-          const hasContent = images?.[0]?.length > 3;
-
           return (
             <PostsDiv key={post_id}>
-              {hasContent && (
-                <PostDiv key={index}>
-                  <ProfileImg
-                    src={
-                      profilePicture ||
-                      "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
-                    }
-                    alt="profile picture"
-                    onClick={() => navigate("/profile")}
-                  />
-                  {/* <FontAwesomeIcon icon={faEdit} color="blue" />
-                  <FontAwesomeIcon icon={faDeleteLeft} color="blue" /> */}
-
-                  <p style={{ color: "blue" }}>Author:{author}</p>
-                  <PreviewImg
-                    src={images?.[0]}
-                    {...{ onClick: () => window.open(url, "_blank") }}
-                  />
-                  <h5>Title: {title}</h5>
-                  <DescriptionDiv>
-                    <p>{description}</p>
-                  </DescriptionDiv>
-                  <p> {calculateTime(created_at)}</p>
-                  <Cinput
-                    style={{ backgroundColor: "#F2F2F2" }}
-                    type="text"
-                    placeholder="Write a comment..."
-                    value={comment}
-                    onChange={handleComment}
-                  />
-                  <p>Source:{domain}</p>
-                </PostDiv>
-              )}
-              <PostDiv onClick={() => handlePostClick(post_id)} key={post_id}>
+              <PostDiv key={post_id} onClick={() => handlePostClick(post_id)}>
                 <ProfileImg
                   src={
                     profilePicture ||
                     "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
                   }
-                  alt=""
+                  alt="profile picture"
                 />
+                <p>{calculateTime(created_at)}</p>
+                <h3>Author:{author}</h3>
+                {title?.length > 0 && <h4>Title:{title}</h4>}
 
-                <p>Author:{author}</p>
-                <h5>Post: {content}</h5>
-                {post_image && <img src={post_image} alt="" />}
+                {post_image && content ? (
+                  <>
+                    <ContentDiv>
+                      <p>{content}</p>
+                    </ContentDiv>
+                    <PreviewImg src={post_image} alt="post image" />
+                  </>
+                ) : urlRegex.test(content) ? (
+                  <PreviewImg
+                    src={images[0]}
+                    alt="post img"
+                    onClick={() => window.open(url, "_blank")}
+                  />
+                ) : (
+                  <ContentDiv>
+                    <p>{content}</p>
+                  </ContentDiv>
+                )}
 
-                <p> {calculateTime(created_at)}</p>
+                {description?.length > 0 && (
+                  <DescriptionDiv>
+                    <p>{description}</p>
+                  </DescriptionDiv>
+                )}
                 <Cinput
-                  style={{ backgroundColor: "#F2F2F2" }}
                   type="text"
-                  placeholder="Write a comment..."
-                  value={comment}
-                  onChange={handleComment}
+                  placeholder="Write a comment"
+                  style={{ fontFamily: "monospace" }}
                 />
+                {domain?.length > 0 && <h4>Source:{domain}</h4>}
+                <Likes />
               </PostDiv>
             </PostsDiv>
           );
@@ -357,7 +333,7 @@ const PostDiv = styled.div`
   justify-content: flex-start;
   background-color: #ffffff;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
+  border-radius: 10px;
   padding: 10px;
   gap: 10px;
   border: 1px solid #8b8a8a;
@@ -471,4 +447,13 @@ const CustomForm = styled.form`
   display: flex;
   align-items: center;
   width: 10%;
+`;
+
+const ContentDiv = styled.div`
+  width: 100%;
+  background-color: #c3e3f0;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  padding: 10px;
+  gap: 10px;
 `;
