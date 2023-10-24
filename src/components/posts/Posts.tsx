@@ -276,12 +276,20 @@ export const Posts = () => {
                 {title?.length > 0 && <h4>Title:{title}</h4>}
 
                 {post_image && content ? (
-                  <>
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
                     <ContentDiv>
                       <p>{content}</p>
                     </ContentDiv>
                     <PreviewImg src={post_image} alt="post image" />
-                  </>
+                  </div>
                 ) : urlRegex.test(content) ? (
                   <PreviewImg
                     src={images[0]}
@@ -349,7 +357,7 @@ const PostsDiv = styled.div`
 const PostDiv = styled.div`
   display: flex;
   flex-direction: column;
-  width: 25%;
+  width: 70%;
   height: fit-content;
   justify-content: flex-start;
   background-color: #ffffff;
@@ -412,7 +420,7 @@ export const ProfileImg = styled.img`
   }
 `;
 const PreviewImg = styled.img`
-  width: 100%;
+  width: 45%;
   height: 50%;
   border-radius: 20px;
   object-fit: cover;
@@ -471,7 +479,7 @@ const CustomForm = styled.form`
 `;
 
 const ContentDiv = styled.div`
-  width: 100%;
+  width: fit-content;
   background-color: #c3e3f0;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
   border-radius: 20px;
