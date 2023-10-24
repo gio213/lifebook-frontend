@@ -7,6 +7,8 @@ import { BlueBtn } from "../landing page/LandingPage";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
+import { Toaster } from "react-hot-toast";
+import Toast from "../toas messages/ToastMessages";
 
 export const SignUp = () => {
   const api = "https://lifebookbackend.up.railway.app/api/user_register";
@@ -15,7 +17,9 @@ export const SignUp = () => {
   const [password, setPassword] = useState<string>("");
   const [birth_date, setbirth_date] = useState<string>("");
   const [gender, setGender] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loginData, setLoginData] = useState<string>("");
+
+  const [visible, setVisible] = useState<boolean>(false);
   const [profile_picture, setprofile_picture] = useState({} as File);
 
   const handleUsernameSubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,21 +100,35 @@ export const SignUp = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
-        alert(data.message);
+        console.log("Success:", data);
+        setLoginData(data.message);
       } else {
         const errorData = await response.json();
+
+        setLoginData(errorData.message);
+
         console.error("Error registering the user:", errorData);
-        alert("Error registering the user: " + errorData.message);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while registering.");
+    } finally {
+      setVisible(true);
     }
   };
 
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => {
+        setVisible(false);
+        navigate("/login");
+      }, 1000);
+    }
+  }, [visible]);
+
   return (
     <Container style={{ padding: "0", fontFamily: "monospace" }}>
+      {visible && <Toast message={loginData} setVisible={setVisible} />}
+
       <Div
         style={{ backgroundColor: "#1b7be6", borderRadius: "0", gap: "20px" }}
       >
@@ -225,6 +243,7 @@ export const SignUp = () => {
           </FormDiv>
         </RightSmallDiv>
       </Div>
+      <Toaster />
     </Container>
   );
 };

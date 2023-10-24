@@ -7,6 +7,7 @@ import LinkPreviewComponent from "../linkPreview/LinkPreview";
 import { useGetUSerData } from "../../hooks/useGetUserData";
 import axios from "axios";
 import { library } from "@fortawesome/fontawesome-svg-core";
+import { Toaster } from "react-hot-toast";
 import Toast from "../../components/toas messages/ToastMessages";
 import { Likes } from "../likes/Likes";
 import { calculateTime } from "../../hooks/useGetUserData";
@@ -254,8 +255,11 @@ export const Posts = () => {
           domain,
           index,
           profile_picture,
+          currentUserLiked,
+          likes,
           profilePicture,
           post_image,
+          likedByUsers,
         }) => {
           return (
             <PostsDiv key={post_id}>
@@ -301,12 +305,29 @@ export const Posts = () => {
                   style={{ fontFamily: "monospace" }}
                 />
                 {domain?.length > 0 && <h4>Source:{domain}</h4>}
-                <Likes />
+
+                <LikedDiv>
+                  <Likes
+                    post_id={post_id}
+                    likes={likes}
+                    liked={currentUserLiked}
+                  />
+
+                  <PeopleLikedDiv>
+                    <p>Liked by:</p>
+                    <CustomSelect>
+                      {likedByUsers?.map((user, index) => {
+                        return <option key={index}>{user}</option>;
+                      })}
+                    </CustomSelect>
+                  </PeopleLikedDiv>
+                </LikedDiv>
               </PostDiv>
             </PostsDiv>
           );
         }
       )}
+      <Toaster />
     </div>
   );
 };
@@ -456,4 +477,27 @@ const ContentDiv = styled.div`
   border-radius: 20px;
   padding: 10px;
   gap: 10px;
+`;
+
+const LikedDiv = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const PeopleLikedDiv = styled.div`
+  display: flex;
+  align-items: center;
+
+  width: 70%;
+
+  p {
+    font-family: monospace;
+  }
+`;
+
+const CustomSelect = styled.select`
+  border: 1px solid #e6e8ec;
+  border-radius: 4px;
+  box-sizing: border-box;
 `;

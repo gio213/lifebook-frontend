@@ -1,45 +1,91 @@
 import likeIcon from "../../assets/like-icon-default.png";
 import likedIncon from "../../assets/liked-icon.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
 
-export const Likes = (props: any) => {
+export const Likes = (props: { post_id: string; likes: number; liked: "" }) => {
   const [like, setLike] = useState<boolean>(false);
-  const [likes, setLikes] = useState<number>(0);
 
-  const handleLike = () => {
-    setLike(!like);
-    if (like) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
+  const api = "https://lifebookbackend.up.railway.app/api/post_like";
+  const token = document.cookie.split("=")[1];
+  const [likes, setLikes] = useState<number>(props.likes);
+
+  const postLike = async () => {
+    try {
+      const response = await axios.post(
+        api,
+        { post_id: props.post_id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log(response.data);
+
+        return response.data;
+      } else {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+      throw error;
+    }
+  };
+  const unLikePost = async () => {
+    const api = "https://lifebookbackend.up.railway.app/api/unlike_post";
+    try {
+      axios.delete(api, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          post_id: props.post_id,
+        },
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  return (
-    <LikeDiv>
-      <img
-        src={like ? likedIncon : likeIcon}
-        alt="like icon"
-        onClick={handleLike}
-      />
-      <p>{likes}</p>
-    </LikeDiv>
-  );
-};
-() => {
-  const [like, setLike] = useState<boolean>(false);
-  const [likes, setLikes] = useState<number>(0);
+  useEffect(() => {
+    if (props.liked === "true") {
+      setLike(true);
+    } else {
+      setLike(false);
+    }
+  }, [props.liked]);
 
   return (
-    <div>
-      <img
-        src={like ? likedIncon : likeIcon}
-        alt="like icon"
-        onClick={handleLike}
-      />
+    <LikeDiv>
+      {like ? (
+        <img
+          src={likedIncon}
+          alt="like"
+          onClick={() => {
+            setLike(false);
+            unLikePost();
+            setLikes(likes - 1);
+          }}
+        />
+      ) : (
+        <img
+          src={likeIcon}
+          alt="like"
+          onClick={() => {
+            setLike(true);
+            postLike();
+            setLikes(likes + 1);
+          }}
+        />
+      )}
       <p>{likes}</p>
-    </div>
+    </LikeDiv>
   );
 };
 const LikeDiv = styled.div`

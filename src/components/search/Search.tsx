@@ -77,8 +77,8 @@ export const SearchInput = () => {
         "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
-        follower_id: 101,
-        followee_id: 100,
+        follower_id: follower_id,
+        followee_id: followee_id,
       }),
     })
       .then((response) => response.json())
@@ -112,7 +112,11 @@ export const SearchInput = () => {
       {users?.map((user, index) => {
         return (
           <SearchedDiv key={index}>
-            <SearchedContent>
+            <SearchedContent
+              onClick={(e) => {
+                console.log(user.user_id);
+              }}
+            >
               <ProfileImg
                 src={
                   user.profile_picture

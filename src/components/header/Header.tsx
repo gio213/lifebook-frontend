@@ -17,7 +17,7 @@ export const Header = () => {
   const [notifications, setNotifications] = useState<[]>([]);
   const token = document.cookie.split("=")[1];
   const [isShow, setIsShow] = useState(false);
-  const [follower_id, setFollower_id] = useState<number>();
+  const [follower_id, setFollower_id] = useState<number>(0);
   const [acceptRejectValue, setAcceptRejectValue] = useState<string>("");
   const getNotificationApi =
     "https://lifebookbackend.up.railway.app/api/get_notifications";
@@ -49,14 +49,16 @@ export const Header = () => {
     }
   };
 
-  const acceptRejectFollowRequestTest = () => {
-    setAcceptRejectValue("1");
-  };
+  useEffect(() => {
+    if (acceptRejectValue == "1" || acceptRejectValue == "0") {
+      acceptRequest();
+    }
+  }, [acceptRejectValue]);
 
   const acceptRequest = () => {
     const api = `https://lifebookbackend.up.railway.app/api/accept_reject_follow_request/`;
 
-    console.log(follower_id, acceptRejectValue);
+    console.log("f_id", follower_id, "rejection_status", acceptRejectValue);
 
     fetch(api, {
       method: "POST",
@@ -117,6 +119,8 @@ export const Header = () => {
               <BlueBtn
                 value={"1"}
                 onClick={(e) => {
+                  console.log(e.target.value);
+
                   setAcceptRejectValue(e.target.value);
                   acceptRequest();
                 }}
@@ -131,6 +135,8 @@ export const Header = () => {
               <BlueBtn
                 value={"0"}
                 onClick={(e) => {
+                  console.log("rejection", e.target.value);
+
                   setAcceptRejectValue(e.target.value);
                   acceptRequest();
                 }}

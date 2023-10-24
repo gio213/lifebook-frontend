@@ -22,6 +22,12 @@ const Toast = (props: PropType) => {
       toast.error("Please fill in all fields");
     } else if (message === "Please write something") {
       toast.error("Please write something");
+    } else if (message === "That username is already in use") {
+      toast.error("That username is already in use");
+    } else if (message === "That email is already in use") {
+      toast.error("That email is already in use");
+    } else if (message === "User registered") {
+      toast.success("Registration successful ");
     }
 
     const id: number = setTimeout(() => {
