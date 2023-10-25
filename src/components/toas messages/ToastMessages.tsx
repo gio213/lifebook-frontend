@@ -28,6 +28,12 @@ const Toast = (props: PropType) => {
       toast.error("That email is already in use");
     } else if (message === "User registered") {
       toast.success("Registration successful ");
+    } else if (message === "Comment created successfully") {
+      toast.success("Comment created successfully");
+    } else if (message === "Follow request accepted") {
+      toast.success("Follow request accepted");
+    } else if (message === "Follow request rejected") {
+      toast.success("Follow request rejected");
     }
 
     const id: number = setTimeout(() => {

@@ -11,12 +11,14 @@ import { Toaster } from "react-hot-toast";
 import Toast from "../../components/toas messages/ToastMessages";
 import { Likes } from "../likes/Likes";
 import { calculateTime } from "../../hooks/useGetUserData";
+import { Comment } from "../comment/Comment";
 import {
   faCloudUpload,
   faDeleteLeft,
   faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { head } from "axios";
 
 export const Posts = () => {
   const api =
@@ -26,7 +28,7 @@ export const Posts = () => {
   const [posts, setPosts] = useState<[]>([]);
   const [token, setToken] = useState("");
   const [writePost, setWritePost] = useState<string>("");
-  const [comment, setComment] = useState("");
+
   const [post_id, setPost_id] = useState();
   const [profile_picture, setprofile_picture] = useState({} as File);
   const [visible, setVisible] = useState<boolean>(true);
@@ -59,9 +61,12 @@ export const Posts = () => {
   );
 
   const fetchPreviewData = async (posts) => {
+    console.log({ posts });
+
     const previewDataPromises = posts.map(async (post) => {
       if (urlRegex.test(post.content)) {
         const previewData = await fetchUrlData(post.content);
+
         return { ...post, ...previewData };
       }
       return post;
@@ -84,23 +89,31 @@ export const Posts = () => {
 
       const { result } = response.data;
       const postsWithPreviewData = await fetchPreviewData(result);
+      console.log({ postsWithPreviewData });
+
       setPosts(postsWithPreviewData);
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   };
 
   const cookieToken = document.cookie.split("=")[1];
 
-  const fetchUrlData = async (url) => {
+  const fetchUrlData = async (url: string) => {
+    const api = `https://jsonlink.io/api/extract?url=${url}`;
+
     try {
-      const response = await axios.get(
-        `https://jsonlink.io/api/extract?url=${url}`
-      );
-      return response.data;
+      const response = await axios.get(api);
+
+      if (response.status !== 200) {
+        throw new Error("API request failed");
+      }
+
+      const { data } = response;
+
+      return data;
     } catch (error) {
-      console.error("Error fetching data:", error);
-      throw error;
+      console.error(error);
     }
   };
 
@@ -157,11 +170,6 @@ export const Posts = () => {
           setVisible(true);
         });
     }
-  };
-
-  const handleComment = (e: React.ChangeEvent<HTMLTextAreaElement>): string => {
-    setComment(e.target.value);
-    return comment;
   };
 
   const handlePostClick = (post_id: number): number => {
@@ -256,6 +264,7 @@ export const Posts = () => {
           index,
           profile_picture,
           currentUserLiked,
+          commentedByUsers,
           likes,
           profilePicture,
           post_image,
@@ -292,7 +301,7 @@ export const Posts = () => {
                   </div>
                 ) : urlRegex.test(content) ? (
                   <PreviewImg
-                    src={images[0]}
+                    src={images?.[0]}
                     alt="post img"
                     onClick={() => window.open(url, "_blank")}
                   />
@@ -307,12 +316,39 @@ export const Posts = () => {
                     <p>{description}</p>
                   </DescriptionDiv>
                 )}
-                <Cinput
-                  type="text"
-                  placeholder="Write a comment"
-                  style={{ fontFamily: "monospace" }}
-                />
+
                 {domain?.length > 0 && <h4>Source:{domain}</h4>}
+                <h3>Comments:</h3>
+                <CommentDiv>
+                  {commentedByUsers !== null &&
+                  Array.isArray(commentedByUsers) &&
+                  commentedByUsers.length > 0 &&
+                  commentedByUsers[0].content !== null ? (
+                    commentedByUsers.map((comment, index) => (
+                      <CommentContetnDiv key={index}>
+                        {comment.username !== null &&
+                          comment.profilePicture !== null && (
+                            <CustomDiv>
+                              <ProfileAuthor>
+                                <CommentPicture
+                                  src={comment.profilePicture}
+                                  alt="profile picture"
+                                />
+                                <p>{comment.username}</p>
+                              </ProfileAuthor>
+                              <div style={{ width: "20%", opacity: "0.5" }}>
+                                {calculateTime(comment.created_at)}
+                              </div>
+                            </CustomDiv>
+                          )}
+                        {comment.content !== null && <p>{comment.content}</p>}
+                      </CommentContetnDiv>
+                    ))
+                  ) : (
+                    <p>No comments yet</p>
+                  )}
+                </CommentDiv>
+                <Comment writePost={writePost} post_id={post_id} />
 
                 <LikedDiv>
                   <Likes
@@ -361,6 +397,7 @@ const PostDiv = styled.div`
   height: fit-content;
   justify-content: flex-start;
   background-color: #ffffff;
+
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   padding: 10px;
@@ -496,6 +533,7 @@ const LikedDiv = styled.div`
 const PeopleLikedDiv = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 
   width: 70%;
 
@@ -508,4 +546,71 @@ const CustomSelect = styled.select`
   border: 1px solid #e6e8ec;
   border-radius: 4px;
   box-sizing: border-box;
+`;
+
+const CommentPicture = styled.img`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  &&:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+`;
+
+const CommentDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 300px;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  justify-content: flex-start;
+  padding: 10px;
+  gap: 10px;
+  transition: all 0.2s ease-in-out;
+  font-family: monospace;
+  &&:hover {
+    transform: scale(1.01);
+  }
+`;
+
+const CommentContetnDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: fit-content;
+  padding: 10px;
+  gap: 10px;
+  background-color: #ebf2f7;
+  border-radius: 10px;
+  word-wrap: break-word;
+  P {
+    font-family: monospace;
+    font-weight: bold;
+  }
+`;
+
+const ProfileAuthor = styled.div`
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  height: fit-content;
+  justify-content: flex-start;
+  align-items: center;
+
+  p {
+    font-family: monospace;
+    font-weight: bold;
+    text-transform: capitalize;
+  }
+`;
+
+const CustomDiv = styled.div`
+  display: flex;
+  width: 100%;
+  height: fit-content;
+  justify-content: space-between;
+  align-items: center;
 `;

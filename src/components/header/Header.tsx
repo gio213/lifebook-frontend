@@ -11,7 +11,8 @@ import redBellIcon from "../../assets/red-bell-icon.png";
 import { BlueBtn } from "../landing page/LandingPage";
 import closeIcon from "../../assets/close-icon.png";
 import { calculateTime } from "../../hooks/useGetUserData";
-
+import Toast from "../toas messages/ToastMessages";
+import { Toaster } from "react-hot-toast";
 export const Header = () => {
   const [userData, setUserData] = useState({});
   const [notifications, setNotifications] = useState<[]>([]);
@@ -21,6 +22,8 @@ export const Header = () => {
   const [acceptRejectValue, setAcceptRejectValue] = useState<string>("");
   const getNotificationApi =
     "https://lifebookbackend.up.railway.app/api/get_notifications";
+  const [visible, setVisible] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
 
   const navigate = useNavigate();
   const { getUserData } = useGetUSerData();
@@ -75,9 +78,13 @@ export const Header = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setMessage(data);
       })
       .catch((error) => {
         console.error("Error:", error);
+      })
+      .finally(() => {
+        setVisible(true);
       });
   };
 
@@ -88,6 +95,11 @@ export const Header = () => {
       setUserData(data);
       getNotifications();
     })();
+    if (visible) {
+      setInterval(() => {
+        setVisible(false);
+      }, 1000);
+    }
   }, []);
 
   const handleNotificationClick = () => {
@@ -106,48 +118,56 @@ export const Header = () => {
                 setAcceptRejectValue(e.target.value);
               }}
             >
-              <ProfileImg src={notification.sender_profile_picture} alt="" />
-              <h3 style={{ fontFamily: "monospace" }}>
-                {notification.sender_name}
-              </h3>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "5px" }}
+              >
+                <ProfileImg src={notification.sender_profile_picture} alt="" />
+                <h3 style={{ fontFamily: "monospace" }}>
+                  {notification.sender_name}
+                </h3>
+              </div>
               <p
                 style={{ fontFamily: "monospace" }}
-              >{`sent you ${notification.type}`}</p>
+              >{`${notification.type}`}</p>
               <p style={{ fontFamily: "monospace", color: "grey" }}>
                 {calculateTime(notification.created_at)}
               </p>
-              <BlueBtn
-                value={"1"}
-                onClick={(e) => {
-                  console.log(e.target.value);
+              {notification.type === "Sent you a follow request" ? (
+                <>
+                  <BlueBtn
+                    value={"1"}
+                    onClick={(e) => {
+                      console.log(e.target.value);
 
-                  setAcceptRejectValue(e.target.value);
-                  acceptRequest();
-                }}
-                style={{
-                  width: "fit-content",
-                  height: "30px",
-                  fontFamily: "monospace",
-                }}
-              >
-                Accept
-              </BlueBtn>
-              <BlueBtn
-                value={"0"}
-                onClick={(e) => {
-                  console.log("rejection", e.target.value);
+                      setAcceptRejectValue(e.target.value);
+                      acceptRequest();
+                    }}
+                    style={{
+                      width: "fit-content",
+                      height: "30px",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Accept
+                  </BlueBtn>
+                  <BlueBtn
+                    value={"0"}
+                    onClick={(e) => {
+                      console.log("rejection", e.target.value);
 
-                  setAcceptRejectValue(e.target.value);
-                  acceptRequest();
-                }}
-                style={{
-                  width: "fit-content",
-                  height: "30px",
-                  fontFamily: "monospace",
-                }}
-              >
-                Decline
-              </BlueBtn>
+                      setAcceptRejectValue(e.target.value);
+                      acceptRequest();
+                    }}
+                    style={{
+                      width: "fit-content",
+                      height: "30px",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Decline
+                  </BlueBtn>
+                </>
+              ) : null}
             </NotificationItem>
           </div>
         );
@@ -158,6 +178,7 @@ export const Header = () => {
 
   return (
     <Div>
+      {visible && <Toast message={message} setVisible={setVisible} />}
       {isShow ? (
         <NotificationDiv>{handleNotificationClick()}</NotificationDiv>
       ) : null}
@@ -211,6 +232,7 @@ export const Header = () => {
           onClick={() => navigate("/profile")}
         />
       </HeaderRightDiv>
+      <Toaster />
     </Div>
   );
 };
@@ -283,10 +305,10 @@ const AnimateBell = styled.img`
 const NotificationDiv = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  /* align-items: center; */
+  height: 340px;
   width: fit-content;
-  /* height: 200px; */
+
   overflow-y: scroll;
   z-index: 1000;
   top: 80px;
@@ -305,7 +327,7 @@ const NotificationItem = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: fit-content;
+  height: 70px;
   padding: 10px;
   box-sizing: border-box;
   border-bottom: 1px solid #e6e8ec;
