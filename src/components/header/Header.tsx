@@ -102,11 +102,21 @@ export const Header = () => {
     }
   }, []);
 
+  const scrollToPost = (postID) => {
+    const postElement = document.getElementById(`post-${postID}`);
+    console.log(postID);
+  };
+
   const handleNotificationClick = () => {
     return notifications.map((notification, index, sender_id) => {
       if (isShow && notifications.length !== 0) {
         return (
-          <div key={notification.notification_id}>
+          <div
+            key={notification.notification_id}
+            onClick={() => {
+              scrollToPost(notification.post_id);
+            }}
+          >
             <CloseBtn
               src={closeIcon}
               alt="close icon"
@@ -179,8 +189,14 @@ export const Header = () => {
   return (
     <Div>
       {visible && <Toast message={message} setVisible={setVisible} />}
+
       {isShow ? (
-        <NotificationDiv>{handleNotificationClick()}</NotificationDiv>
+        <NotificationDiv>
+          <p style={{ fontFamily: "monospace", fontWeight: "bold" }}>
+            Notifications ({notifications.length})
+          </p>
+          {handleNotificationClick()}
+        </NotificationDiv>
       ) : null}
 
       <div style={{ width: "345px" }}>
@@ -306,9 +322,9 @@ const NotificationDiv = styled.div`
   display: flex;
   flex-direction: column;
   /* align-items: center; */
-  height: 340px;
-  width: fit-content;
 
+  width: fit-content;
+  max-height: 500px;
   overflow-y: scroll;
   z-index: 1000;
   top: 80px;
@@ -327,7 +343,7 @@ const NotificationItem = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 70px;
+  height: fit-content;
   padding: 10px;
   box-sizing: border-box;
   border-bottom: 1px solid #e6e8ec;

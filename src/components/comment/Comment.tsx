@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Cinput } from "../log in/Login";
 import axios from "axios";
-import { Toaster } from "react-hot-toast";
 import Toast from "../toas messages/ToastMessages";
-export const Comment = (props: { writePost: string; post_id: number }) => {
+
+export const Comment = (props: {
+  writePost: string;
+  post_id: number;
+  getPosts: () => void;
+  setLoader: Dispatch<SetStateAction<boolean>>;
+}) => {
   const api = "https://lifebookbackend.up.railway.app/api/create_comment";
   const token = document.cookie.split("=")[1];
   const [comment, setComment] = useState<string>("");
   const [visible, setVisible] = useState<boolean>(false);
-  const [loginData, setLoginData] = useState<string>("");
+
+  const { getPosts, setLoader } = props;
 
   const handleComment = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
   };
 
-  const createPost = async () => {
+  const createComment = async () => {
     try {
       const response = await axios.post(
         api,
@@ -29,7 +35,6 @@ export const Comment = (props: { writePost: string; post_id: number }) => {
 
       if (response.status === 200) {
         console.log(response.data);
-
         return response.data;
       } else {
         throw new Error(`Request failed with status ${response.status}`);
@@ -39,12 +44,15 @@ export const Comment = (props: { writePost: string; post_id: number }) => {
       throw error;
     } finally {
       setVisible(true);
+      getPosts(token);
+      setComment("");
+      setLoader(false);
     }
   };
 
   const enterPressed = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (comment.length > 0 && e.key === "Enter") {
-      createPost();
+      createComment();
     }
   };
 
@@ -66,6 +74,7 @@ export const Comment = (props: { writePost: string; post_id: number }) => {
       )}
       <Cinput
         style={{ fontFamily: "monospace" }}
+        value={comment}
         type="text"
         placeholder="Write a comment and press enter"
         onChange={handleComment}

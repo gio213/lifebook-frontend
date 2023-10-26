@@ -12,13 +12,9 @@ import Toast from "../../components/toas messages/ToastMessages";
 import { Likes } from "../likes/Likes";
 import { calculateTime } from "../../hooks/useGetUserData";
 import { Comment } from "../comment/Comment";
-import {
-  faCloudUpload,
-  faDeleteLeft,
-  faEdit,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCloudUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { head } from "axios";
+import Spiner from "../Spiner/Spiner";
 
 export const Posts = () => {
   const api =
@@ -26,9 +22,9 @@ export const Posts = () => {
   library.add(faCloudUpload);
   const navigate = useNavigate();
   const [posts, setPosts] = useState<[]>([]);
+  const [loader, setLoader] = useState<boolean>(false);
   const [token, setToken] = useState("");
   const [writePost, setWritePost] = useState<string>("");
-
   const [post_id, setPost_id] = useState();
   const [profile_picture, setprofile_picture] = useState({} as File);
   const [visible, setVisible] = useState<boolean>(true);
@@ -76,6 +72,7 @@ export const Posts = () => {
   };
 
   const getPosts = async (token = "") => {
+    setLoader(true);
     try {
       const response = await axios.get(api, {
         headers: {
@@ -89,11 +86,12 @@ export const Posts = () => {
 
       const { result } = response.data;
       const postsWithPreviewData = await fetchPreviewData(result);
-      console.log({ postsWithPreviewData });
 
       setPosts(postsWithPreviewData);
     } catch (error) {
       console.error(error.message);
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -250,126 +248,133 @@ export const Posts = () => {
         )}
       </FirstDiv>
 
-      {posts?.map(
-        ({
-          author,
-          content,
-          created_at,
-          post_id,
-          images,
-          description,
-          url,
-          title,
-          domain,
-          index,
-          profile_picture,
-          currentUserLiked,
-          commentedByUsers,
-          likes,
-          profilePicture,
-          post_image,
-          likedByUsers,
-        }) => {
-          return (
-            <PostsDiv key={post_id}>
-              <PostDiv key={post_id} onClick={() => handlePostClick(post_id)}>
-                <ProfileImg
-                  src={
-                    profilePicture ||
-                    "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
-                  }
-                  alt="profile picture"
-                />
-                <p>{calculateTime(created_at)}</p>
-                <h3>Author:{author}</h3>
-                {title?.length > 0 && <h4>Title:{title}</h4>}
+      {loader ? (
+        <Spiner />
+      ) : (
+        posts?.map(
+          ({
+            author,
+            content,
+            created_at,
+            post_id,
+            images,
+            description,
+            url,
+            title,
+            domain,
+            index,
+            profile_picture,
+            currentUserLiked,
+            commentedByUsers,
+            likes,
+            profilePicture,
+            post_image,
+            likedByUsers,
+          }) => {
+            return (
+              <PostsDiv key={post_id}>
+                <PostDiv key={post_id} onClick={() => handlePostClick(post_id)}>
+                  <ProfileImg
+                    src={
+                      profilePicture ||
+                      "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
+                    }
+                    alt="profile picture"
+                  />
+                  <p>{calculateTime(created_at)}</p>
+                  <h3>Author:{author}</h3>
+                  {title?.length > 0 && <h4>Title:{title}</h4>}
 
-                {post_image && content ? (
-                  <div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                  {post_image && content ? (
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <ContentDiv>
+                        <p>{content}</p>
+                      </ContentDiv>
+                      <PreviewImg src={post_image} alt="post image" />
+                    </div>
+                  ) : urlRegex.test(content) ? (
+                    <PreviewImg
+                      src={images?.[0]}
+                      alt="post img"
+                      onClick={() => window.open(url, "_blank")}
+                    />
+                  ) : (
                     <ContentDiv>
                       <p>{content}</p>
                     </ContentDiv>
-                    <PreviewImg src={post_image} alt="post image" />
-                  </div>
-                ) : urlRegex.test(content) ? (
-                  <PreviewImg
-                    src={images?.[0]}
-                    alt="post img"
-                    onClick={() => window.open(url, "_blank")}
-                  />
-                ) : (
-                  <ContentDiv>
-                    <p>{content}</p>
-                  </ContentDiv>
-                )}
+                  )}
 
-                {description?.length > 0 && (
-                  <DescriptionDiv>
-                    <p>{description}</p>
-                  </DescriptionDiv>
-                )}
+                  {description?.length > 0 && (
+                    <DescriptionDiv>
+                      <p>{description}</p>
+                    </DescriptionDiv>
+                  )}
 
-                {domain?.length > 0 && <h4>Source:{domain}</h4>}
-                <h3>Comments:</h3>
-                <CommentDiv>
-                  {commentedByUsers !== null &&
-                  Array.isArray(commentedByUsers) &&
-                  commentedByUsers.length > 0 &&
-                  commentedByUsers[0].content !== null ? (
-                    commentedByUsers.map((comment, index) => (
-                      <CommentContetnDiv key={index}>
-                        {comment.username !== null &&
-                          comment.profilePicture !== null && (
-                            <CustomDiv>
-                              <ProfileAuthor>
-                                <CommentPicture
-                                  src={comment.profilePicture}
-                                  alt="profile picture"
-                                />
-                                <p>{comment.username}</p>
-                              </ProfileAuthor>
-                              <div style={{ width: "20%", opacity: "0.5" }}>
-                                {calculateTime(comment.created_at)}
-                              </div>
-                            </CustomDiv>
-                          )}
-                        {comment.content !== null && <p>{comment.content}</p>}
-                      </CommentContetnDiv>
-                    ))
+                  {domain?.length > 0 && <h4>Source:{domain}</h4>}
+                  <h3>Comments:</h3>
+                  {commentedByUsers[0].content?.length ? (
+                    <CommentDiv>
+                      {commentedByUsers.map((comment, index) => (
+                        <CommentContetnDiv key={index}>
+                          {comment.username !== null &&
+                            comment.profilePicture !== null && (
+                              <CustomDiv>
+                                <ProfileAuthor>
+                                  <CommentPicture
+                                    src={comment.profilePicture}
+                                    alt="profile picture"
+                                  />
+                                  <p>{comment.username}</p>
+                                </ProfileAuthor>
+                                <div style={{ width: "20%", opacity: "0.5" }}>
+                                  {calculateTime(comment.timestamp)}
+                                </div>
+                              </CustomDiv>
+                            )}
+                          {comment.content !== null && <p>{comment.content}</p>}
+                        </CommentContetnDiv>
+                      ))}
+                    </CommentDiv>
                   ) : (
                     <p>No comments yet</p>
                   )}
-                </CommentDiv>
-                <Comment writePost={writePost} post_id={post_id} />
 
-                <LikedDiv>
-                  <Likes
+                  <Comment
+                    writePost={writePost}
                     post_id={post_id}
-                    likes={likes}
-                    liked={currentUserLiked}
+                    getPosts={getPosts}
+                    setLoader={setLoader}
                   />
 
-                  <PeopleLikedDiv>
-                    <p>Liked by:</p>
-                    <CustomSelect>
-                      {likedByUsers?.map((user, index) => {
-                        return <option key={index}>{user}</option>;
-                      })}
-                    </CustomSelect>
-                  </PeopleLikedDiv>
-                </LikedDiv>
-              </PostDiv>
-            </PostsDiv>
-          );
-        }
+                  <LikedDiv>
+                    <Likes
+                      post_id={post_id}
+                      likes={likes}
+                      liked={currentUserLiked}
+                    />
+
+                    <PeopleLikedDiv>
+                      <p>Liked by:</p>
+                      <CustomSelect>
+                        {likedByUsers?.map((user, index) => {
+                          return <option key={index}>{user}</option>;
+                        })}
+                      </CustomSelect>
+                    </PeopleLikedDiv>
+                  </LikedDiv>
+                </PostDiv>
+              </PostsDiv>
+            );
+          }
+        )
       )}
       <Toaster />
     </div>
@@ -563,7 +568,7 @@ const CommentDiv = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 300px;
+  max-height: 200px;
   box-sizing: border-box;
   overflow-y: scroll;
   justify-content: flex-start;
@@ -576,7 +581,7 @@ const CommentDiv = styled.div`
   }
 `;
 
-const CommentContetnDiv = styled.div`
+export const CommentContetnDiv = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
