@@ -6,7 +6,6 @@ import { useGetUSerData } from "../../hooks/useGetUserData";
 import { Cinput } from "../log in/Login";
 import { calculateTime } from "../../hooks/useGetUserData";
 import io from "socket.io-client";
-import { get } from "axios";
 export const Messaging = () => {
   const token = document.cookie.split("=")[1];
   const getFollowersApi =
