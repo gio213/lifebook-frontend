@@ -17,15 +17,27 @@ const LinkPreviewComponent = ({ writePost }: string) => {
       "(\\#[-a-z\\d_]*)?$",
     "i"
   );
+  const scraperApiKey = "pk_59bb0839cc0fa9434896843ae5fe88faee75c033";
 
   const fetchUrlData = async () => {
-    fetch(`https://jsonlink.io/api/extract?url=${writePost}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setLinkData(data);
-        console.log(data);
+    fetch(
+      `https://jsonlink.io/api/extract?url=${writePost}&api_key=${scraperApiKey}`
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        }
+        setLinkData(response);
+
+        return response.json();
       })
-      .catch((err) => console.log(err));
+      .then((data) => {
+        console.log(data); // Process the JSON response
+        setLinkData(data);
+      })
+      .catch((error) => {
+        console.error("An error occurred:", error);
+      });
   };
 
   useEffect(() => {

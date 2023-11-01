@@ -1,258 +1,352 @@
-// import io from "socket.io-client";
-// import { Header } from "../../header/Header";
-// import styled from "styled-components";
-// import { LeftSideBar } from "../../left sidebar/LeftSideBar";
-// import { Cinput } from "../../log in/Login";
-// import sendIcon from "../../../assets/send-cion.svg";
-// import { useGetUSerData } from "../../../hooks/useGetUserData";
-// import { useEffect } from "react";
-// import { useState } from "react";
+import { LeftSideBar } from "../left sidebar/LeftSideBar";
+import styled from "styled-components";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useGetUSerData } from "../../hooks/useGetUserData";
+import { Cinput } from "../log in/Login";
+import { calculateTime } from "../../hooks/useGetUserData";
+import io from "socket.io-client";
+import { get } from "axios";
+export const Messaging = () => {
+  const token = document.cookie.split("=")[1];
+  const getFollowersApi =
+    "https://lifebookbackend.up.railway.app/api/get_current_user_followers";
 
-// export const Messaging = () => {
-//   const token = document.cookie.split("=")[1];
-//   const [userData, setUserData] = useState({});
-//   const [chat, setChat] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [followerUsername, setFollowerUsername] = useState("");
+  const [followerImg, setFollowerImg] = useState("");
+  const [followersId, setFollowersId] = useState<number>(0);
+  const [visible, setVisible] = useState(false);
+  const [currentUserID, setCurrentUserID] = useState<number>(0);
+  const [chat, setChat] = useState([]);
+  const [messageTxt, setMessageTxt] = useState("");
+  const [socket, setSocket] = useState<any>(null);
+  const [followersID, setFollowersID] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
-//   const { getUserData } = useGetUSerData();
+  // console.log("online users", onlineUsers);
+  // console.log("followers id", followersID);
 
-//   useEffect(() => {
-//     (async () => {
-//       const data = await getUserData();
-//       setUserData(data);
-//       console.log(data);
-//       socket.on("chat", (senderChats) => {
-//         setChat(senderChats);
-//       });
-//     })();
-//   }, []);
+  const { getUserData } = useGetUSerData();
+  const getFollowers = async () => {
+    try {
+      const response = await axios.get(getFollowersApi, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = await response.data.result;
+        // console.log(response.data.result);
+        setFollowers([...data]);
+        setFollowersID(data.map((follower: any) => follower.user_id));
+      } else {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+      throw error;
+    }
+  };
 
-//   const sendChatToSocket = (chat) => {
-//     socket.emit("chat", chat);
-//   };
+  const getChat = async () => {
+    try {
+      const api = "https://lifebookbackend.up.railway.app/api/get_messages";
+      const response = await fetch(api, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: followersId,
+        }),
+      });
 
-//   const addMessage = (chat) => {
-//     const newChat = [
-//       ...chat,
-//       {
-//         username: userData.username,
-//         profilePicture: userData.profile_picture,
-//       },
-//     ];
-//     setChat([...chat, newChat]);
-//     sendChatToSocket(newChat);
-//   };
+      if (response.ok) {
+        const data = await response.json();
+        // console.log(data);
+        setChat(data);
+      } else {
+        // Handle the case where the API request is not successful (e.g., response.status is not in the 200s)
+        console.error("Failed to fetch chat data");
+      }
+    } catch (error) {
+      // Handle any exceptions that might occur during the API request
+      console.error("An error occurred:", error);
+    }
+  };
 
-//   const socket = io("http://localhost:3000/");
-//   const sendMessage = () => {
-//     socket.emit("message", "Hello world");
-//   };
+  const handleMessage = (e: any) => {
+    setMessageTxt(e.target.value);
+  };
 
-//   const ChatList = () => {
-//     chat.map((chat, index) => {
-//       const chatUsername = chat[index].username;
-//       const chatProfilePicture = chat[index].profilePicture;
-//       if (chatUsername === userData.username)
-//         return (
-//           <BoxSender
-//             key={index}
-//             message={chat.message}
-//             igm={chatProfilePicture}
-//           />
-//         );
-//       return (
-//         <BoxReceiver
-//           key={index}
-//           message={chat.message}
-//           igm={chatProfilePicture}
-//         />
-//       );
-//     });
-//   };
+  const createMessage = async () => {
+    const api = "https://lifebookbackend.up.railway.app/api/create_message";
 
-//   return (
-//     <div>
-//       <Header />
-//       <LeftSideBar />
-//       <Container>
-//         <ChatLeftSide>
-//           <h2 style={{ color: "#5267d3" }}>Lifebook</h2>
-//           <h1 style={{ fontWeight: "bold" }}>Chats</h1>
-//           <Cinput
-//             style={{ fontFamily: "monospace" }}
-//             placeholder="Search in chats"
-//           />
-//         </ChatLeftSide>
-//         <ChatMiddle>
-//           <MidleChatHeader>
-//             <h1 style={{ fontWeight: "bold" }}>Selected user</h1>
-//             <h1 style={{ fontWeight: "bold" }}>Chat</h1>
-//           </MidleChatHeader>
-//           <ChatSpace style={{ display: "flex", alignItems: "center" }}>
-//             {ChatList()}
-//           </ChatSpace>
-//           <ChatInputSend>
-//             <Cinput
-//               style={{ fontFamily: "monospace" }}
-//               placeholder="Type a message"
-//               onChange={(e) => {
-//                 sendChatToSocket(e.target.value);
-//               }}
-//             />
-//             <img
-//               src={sendIcon}
-//               alt="send"
-//               style={{ width: "20px", height: "20px" }}
-//               onClick={() => {
-//                 addMessage(chat);
-//                 console.log(chat);
-//               }}
-//             />
-//           </ChatInputSend>
-//         </ChatMiddle>
-//         <ChatRightSide>
-//           <h1 style={{ fontWeight: "bold" }}>Chat info</h1>
-//         </ChatRightSide>
-//       </Container>
-//     </div>
-//   );
-// };
+    fetch(api, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        receiver_id: followersId,
+        message_content: messageTxt,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
-// export default Messaging;
+  useEffect(() => {
+    (async () => {
+      const data = await getUserData();
+      setCurrentUserID(data.user_id);
+    })();
+  }, []);
 
-// const Container = styled.div`
-//   width: 80%;
-//   height: 700px;
-//   display: flex;
-//   justify-content: flex-start;
-//   margin-top: -730px;
-//   margin-left: 250px;
-//   box-sizing: border-box;
-//   border-radius: 20px;
-// `;
+  useEffect(() => {
+    getFollowers();
+  }, []);
 
-// const ChatLeftSide = styled.div`
-//   width: 20%;
-//   height: 100%;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-start;
-//   background-color: #ffffff;
-//   padding: 20px;
-//   border-bottom-left-radius: 20px;
-//   border-top-left-radius: 20px;
+  useEffect(() => {
+    if (followersId !== 0) {
+      getChat();
+    }
+  }, [followersId]);
 
-//   h1,
-//   p,
-//   h2,
-//   h3,
-//   h4,
-//   h5,
-//   h6 {
-//     font-family: monospace;
-//   }
-// `;
+  // initialize socket
 
-// const ChatMiddle = styled.div`
-//   width: 50%;
-//   height: 100%;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-start;
-// `;
+  useEffect(() => {
+    const newSocket = io("localhost:3000");
+    setSocket(newSocket);
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [currentUserID]);
 
-// const ChatRightSide = styled.div`
-//   width: 20%;
-//   height: 100%;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-start;
-//   background-color: #ffffff;
-//   padding: 20px;
-//   border-bottom-right-radius: 20px;
-//   border-top-right-radius: 20px;
-//   font-family: monospace;
-// `;
+  useEffect(() => {
+    if (socket === null) return;
+    socket.emit("addUsers", { currentUserID });
+    socket.on("getOnlineUsers", (res) => {
+      setOnlineUsers(res);
+    });
+  }, [socket, currentUserID]);
 
-// const MidleChatHeader = styled.div`
-//   width: 100%;
-//   height: 50px;
-//   display: flex;
-//   justify-content: space-between;
-//   align-items: center;
-//   background-color: #ffffff;
-//   border-left: 2px solid #f9f9f9;
-//   border-right: 2px solid #f9f9f9;
+  return (
+    <Container>
+      <LeftSideBar />
 
-//   h1,
-//   p,
-//   h2,
-//   h3,
-//   h4,
-//   h5,
-//   h6 {
-//     font-family: monospace;
-//   }
-// `;
+      <LeftSide>
+        <h1 style={{ color: "#5267d3", fontFamily: "monospace" }}>Connected</h1>
+        <h2 style={{ fontFamily: "monospace" }}>Chats</h2>
+        {followers && followers.length > 0 ? (
+          followers.map((follower: object) => (
+            <ImgUsername
+              key={follower.user_id}
+              onClick={() => {
+                setFollowerUsername(follower.username);
+                setFollowerImg(follower.profile_picture);
+                setFollowersId(follower.user_id);
+                setVisible(true);
+              }}
+            >
+              <FollowerImg src={follower.profile_picture} alt="follower img" />
+              <p style={{ fontFamily: "monospace", fontWeight: "bold" }}>
+                {follower.username}
+              </p>
+            </ImgUsername>
+          ))
+        ) : (
+          <p>You don't have any followers.</p>
+        )}
+      </LeftSide>
 
-// const ChatSpace = styled.div`
-//   width: 100%;
-//   height: 100%;
-//   display: flex;
-//   flex-direction: column;
-//   background-color: #f9f9f9;
-//   overflow-y: scroll;
-//   font-family: monospace;
-// `;
+      <MddleDiv>
+        {visible ? (
+          <ImgUsername style={{ backgroundColor: "white" }}>
+            <FollowerImg src={followerImg} alt="follower img" />
+            <p style={{ fontFamily: "monospace" }}>{followerUsername}</p>
+          </ImgUsername>
+        ) : (
+          <p style={{ fontFamily: "monospace", fontWeight: "bold" }}>
+            {" "}
+            Click on a follower to start a chat.
+          </p>
+        )}
 
-// const ChatInputSend = styled.div`
-//   width: 100%;
-//   display: flex;
-//   justify-content: space-between;
-//   background-color: #f9f9f9;
-//   align-items: center;
-//   padding: 20px;
-// `;
+        {chat.length === 0 ? (
+          <div>
+            <p>Start a conversation with {followerUsername}</p>
+          </div>
+        ) : (
+          chat
+            .sort((a: any, b: any) => a.message_id - b.message_id)
+            .map((message: any, index: number) => {
+              return (
+                <ChatContainer key={index}>
+                  {message.sender_id === currentUserID ? (
+                    <CurrentUserChatContainer>
+                      <div style={{ width: "100%", textAlign: "center" }}>
+                        <CustomP style={{ fontFamily: "monospace" }}>
+                          {calculateTime(message.timestamp)}
+                        </CustomP>
+                      </div>
+                      <CurrentUserChat>
+                        <p style={{ fontFamily: "monospace" }}>
+                          {message.message_content}
+                        </p>
+                      </CurrentUserChat>
+                    </CurrentUserChatContainer>
+                  ) : (
+                    <ReceiverChatContainer>
+                      <CustomP style={{ fontFamily: "monospace" }}>
+                        {calculateTime(message.timestamp)}
+                      </CustomP>
+                      <ReceiverChat>
+                        <p style={{ fontFamily: "monospace" }}>
+                          {message.message_content}
+                        </p>
+                      </ReceiverChat>
+                    </ReceiverChatContainer>
+                  )}
+                </ChatContainer>
+              );
+            })
+        )}
+        <Cinput
+          placeholder="Write message and press enter"
+          value={messageTxt}
+          onChange={handleMessage}
+          onKeyDown={(e: any) => {
+            if (e.key === "Enter") {
+              if (messageTxt.length > 0) {
+                createMessage();
+                setMessageTxt("");
+                console.log(chat);
+              } else {
+                alert("Please write a message");
+              }
+            }
+          }}
+        />
+      </MddleDiv>
 
-// const Receiver = styled.div`
-//   width: 100%;
-//   height: 100%;
-//   display: flex;
-//   justify-content: flex-start;
-//   background-color: #f9f9f9;
-//   align-items: center;
-//   font-family: monospace;
-//   padding: 20px;
-// `;
+      <RightSide>
+        <h1 style={{ color: "#5267d3", fontFamily: "monospace" }}>
+          Online Users
+        </h1>
+      </RightSide>
+    </Container>
+  );
+};
 
-// const Sender = styled.div`
-//   width: 100%;
-//   height: 100%;
-//   display: flex;
-//   justify-content: flex-end;
-//   background-color: #f9f9f9;
-//   align-items: center;
-//   font-family: monospace;
-//   padding: 20px;
-// `;
+const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
 
-// const BoxReceiver = styled.div`
-//   width: 80%;
-//   height: auto;
-//   padding: 10px;
-//   background-color: white;
-//   border-radius: 20px;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-start;
-// `;
+const LeftSide = styled.div`
+  width: 20%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fff;
+  padding: 10px;
+`;
 
-// const BoxSender = styled.div`
-//   width: 80%;
-//   height: auto;
-//   padding: 10px;
-//   background-color: white;
-//   border-radius: 20px;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: flex-end;
-// `;
+const ImgUsername = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #e1e1e1;
+  border-bottom: 1px #e1e1e1;
+  &&:hover {
+    background-color: #e1e1e1;
+    cursor: pointer;
+  }
+`;
+
+const FollowerImg = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+const MddleDiv = styled.div`
+  width: 60%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const RightSide = styled.div`
+  width: 20%;
+  height: 100%;
+  border: 1px solid black;
+`;
+
+const ChatContainer = styled.div`
+  width: 100%;
+  height: max-content;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+`;
+
+const CurrentUserChatContainer = styled.div`
+  width: 100%;
+  flex-direction: column;
+  display: flex;
+  align-items: flex-end;
+`;
+
+const CurrentUserChat = styled.div`
+  width: fit-content;
+  display: flex;
+  background-color: #5267d3;
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  color: #fff;
+  border-radius: 10px;
+  margin-top: 2px;
+  word-wrap: break-word;
+  padding: 5px;
+  border-radius: 5px;
+`;
+const ReceiverChatContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+`;
+
+const ReceiverChat = styled.div`
+  width: fit-content;
+  display: flex;
+  background-color: #c3e3f0;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+  margin-top: 2px;
+  word-wrap: break-word;
+  border-radius: 5px;
+  padding: 5px;
+`;
+
+const CustomP = styled.p`
+  opacity: 0.5;
+  font-family: monospace;
+`;

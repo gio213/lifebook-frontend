@@ -30,16 +30,15 @@ export const LeftSideBar = () => {
   return (
     <SidebarDiv>
       <SidebarItemDiv>
-        <PearDiv>
+        <PearDiv onClick={() => navigate("/newsfeed")}>
           <SideBarIcon
-            onClick={() => navigate("/newsfeed")}
             style={{ width: "20px", height: "20px" }}
             src={homeIncon}
             alt="home icon"
           />
           <SideBarText style={{ fontFamily: "monospace" }}>Home</SideBarText>
         </PearDiv>
-        <PearDiv>
+        <PearDiv onClick={() => navigate("/profile")}>
           <ProfileImg
             style={{ width: "20px", height: "20px" }}
             src={
@@ -47,7 +46,6 @@ export const LeftSideBar = () => {
               "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"
             }
             alt="profile picture"
-            onClick={() => navigate("/profile")}
           />
           <SideBarText style={{ fontFamily: "monospace" }}>Profile</SideBarText>
         </PearDiv>
@@ -61,13 +59,13 @@ export const LeftSideBar = () => {
             Favorites
           </SideBarText>
         </PearDiv>
-        <PearDiv>
+        <PearDiv onClick={() => navigate("/messaging")}>
           <SideBarIcon src={messageIcon} alt="message icon" />
           <SideBarText style={{ fontFamily: "monospace" }}>
             Messages
           </SideBarText>
         </PearDiv>
-        <PearDiv>
+        <PearDiv onClick={() => navigate("/followers")}>
           <SideBarIcon src={followersIcon} alt="followers icon" />
           <SideBarText style={{ fontFamily: "monospace" }}>
             Followers

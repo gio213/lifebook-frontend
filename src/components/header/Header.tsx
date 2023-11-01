@@ -13,6 +13,7 @@ import closeIcon from "../../assets/close-icon.png";
 import { calculateTime } from "../../hooks/useGetUserData";
 import Toast from "../toas messages/ToastMessages";
 import { Toaster } from "react-hot-toast";
+import { useRef } from "react";
 export const Header = () => {
   const [userData, setUserData] = useState({});
   const [notifications, setNotifications] = useState<[]>([]);
@@ -49,6 +50,18 @@ export const Header = () => {
     } catch (error) {
       console.error("Request failed:", error);
       throw error;
+    }
+  };
+
+  const postRefs = {};
+
+  const handleFocus = (notification) => {
+    // Find the corresponding post using notification.post_id
+    const postId = notification.post_id;
+    const postRef = postRefs[postId];
+
+    if (postRef && postRef.current) {
+      postRef.current.focus();
     }
   };
 
@@ -102,11 +115,6 @@ export const Header = () => {
     }
   }, []);
 
-  const scrollToPost = (postID) => {
-    const postElement = document.getElementById(`post-${postID}`);
-    console.log(postID);
-  };
-
   const handleNotificationClick = () => {
     return notifications.map((notification, index, sender_id) => {
       if (isShow && notifications.length !== 0) {
@@ -114,7 +122,7 @@ export const Header = () => {
           <div
             key={notification.notification_id}
             onClick={() => {
-              scrollToPost(notification.post_id);
+              // console.log(notification.post_id);
             }}
           >
             <CloseBtn
@@ -126,6 +134,7 @@ export const Header = () => {
               onClick={(e) => {
                 setFollower_id(notification.sender_id);
                 setAcceptRejectValue(e.target.value);
+                handleFocus(notification);
               }}
             >
               <div

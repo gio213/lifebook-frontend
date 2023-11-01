@@ -19,6 +19,7 @@ import Spiner from "../Spiner/Spiner";
 export const Posts = () => {
   const api =
     "https://lifebookbackend.up.railway.app/api/get_feed_for_auth_user";
+  const scraperApiKey = "pk_59bb0839cc0fa9434896843ae5fe88faee75c033";
   library.add(faCloudUpload);
   const navigate = useNavigate();
   const [posts, setPosts] = useState<[]>([]);
@@ -95,10 +96,12 @@ export const Posts = () => {
     }
   };
 
+  // const apiUrl = `https://jsonlink.io/api/extract?url=${url}&api_key=${apiKey}`;
+
   const cookieToken = document.cookie.split("=")[1];
 
   const fetchUrlData = async (url: string) => {
-    const api = `https://jsonlink.io/api/extract?url=${url}`;
+    const api = `https://jsonlink.io/api/extract?url=${url}&api_key=${scraperApiKey}`;
 
     try {
       const response = await axios.get(api);
