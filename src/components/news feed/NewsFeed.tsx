@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Header } from "../header/Header";
 import { Posts } from "../posts/Posts";
 import { LeftSideBar } from "../left sidebar/LeftSideBar";
-import { Profile } from "../user profile/Profile";
+
 export const NewsFeed = () => {
   return (
     <div>

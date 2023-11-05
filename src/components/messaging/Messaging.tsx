@@ -18,12 +18,13 @@ export const Messaging = () => {
   const [visible, setVisible] = useState(false);
   const [currentUserID, setCurrentUserID] = useState<number>(0);
   const [chat, setChat] = useState([]);
+  const [onlineUser, setOnlineUser] = useState<number>(0);
   const [messageTxt, setMessageTxt] = useState("");
   const [socket, setSocket] = useState<any>(null);
   const [followersID, setFollowersID] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
-  // console.log("online users", onlineUsers);
+  console.log("online users", onlineUsers);
   // console.log("followers id", followersID);
 
   const { getUserData } = useGetUSerData();
@@ -40,6 +41,7 @@ export const Messaging = () => {
         // console.log(response.data.result);
         setFollowers([...data]);
         setFollowersID(data.map((follower: any) => follower.user_id));
+        setOnlineUser(data.map((follower: any) => follower.user_id));
       } else {
         throw new Error(`Request failed with status ${response.status}`);
       }
@@ -129,13 +131,13 @@ export const Messaging = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, [currentUserID]);
+  }, []);
 
   useEffect(() => {
     if (socket === null) return;
-    socket.emit("addUsers", { currentUserID });
-    socket.on("getOnlineUsers", (res) => {
-      setOnlineUsers(res);
+    socket.emit("addUsers", onlineUsers, currentUserID);
+    socket.on("getOnlineUsers", (onlineUsers, currentUserID) => {
+      setOnlineUsers(onlineUsers);
     });
   }, [socket, currentUserID]);
 
@@ -229,7 +231,6 @@ export const Messaging = () => {
               if (messageTxt.length > 0) {
                 createMessage();
                 setMessageTxt("");
-                console.log(chat);
               } else {
                 alert("Please write a message");
               }

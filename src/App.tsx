@@ -7,6 +7,7 @@ import { SignUp } from "./components/sign up/SignUp";
 import { NewsFeed } from "./components/news feed/NewsFeed";
 import { Profile } from "./components/user profile/Profile";
 import { Messaging } from "./components/messaging/Messaging";
+import { Followers } from "./components/followers/Followers";
 const App = () => {
   return (
     <Router>
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/newsfeed" Component={NewsFeed} />
         <Route path="/profile" Component={Profile} />
         <Route path="/messaging" Component={Messaging} />
+        <Route path="/followers" Component={Followers} />
       </Routes>
     </Router>
   );
