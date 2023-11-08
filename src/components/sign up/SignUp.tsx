@@ -60,14 +60,7 @@ export const SignUp = () => {
   const register = async () => {
     try {
       // Validate inputs
-      if (
-        !profile_picture ||
-        !username ||
-        !email ||
-        !password ||
-        !gender ||
-        !birth_date
-      ) {
+      if (!username || !email || !password || !gender || !birth_date) {
         alert("Please fill all the fields");
         return;
       }
