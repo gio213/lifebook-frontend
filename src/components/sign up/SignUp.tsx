@@ -153,7 +153,10 @@ export const SignUp = () => {
                   alt="upload img"
                 />
               </Circle>
-              <label htmlFor="uploadfile">Upload profile profile_picture</label>
+              <label htmlFor="uploadfile">
+                Upload profile Profile picture{" "}
+                <p style={{ color: "red" }}>Its a mandatory</p>{" "}
+              </label>
               <input
                 onChange={handleprofile_pictureSubmit}
                 type="file"
