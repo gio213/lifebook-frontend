@@ -113,7 +113,6 @@ export const SignUp = () => {
     if (visible) {
       setTimeout(() => {
         setVisible(false);
-        navigate("/login");
       }, 1000);
     }
   }, [visible]);
